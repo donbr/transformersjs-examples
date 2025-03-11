@@ -1,0 +1,3 @@
+# appropriate settings for Vercel deployment
+node_modules
+.next
