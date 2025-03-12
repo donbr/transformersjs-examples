@@ -90,7 +90,7 @@ function HomePage() {
     <div className="max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-2">Transformers.js Examples</h1>
       <p className="mb-8 text-gray-600">
-        Run machine learning models directly in your browser
+        Run machine learning models directly in your browser <a href="https://github.com/donbr/transformers-js-examples/blob/main/README.md" className="text-blue-600 hover:underline">leveraging powerful examples</a> from the Transformers.js community!
       </p>
       
       {!hasWebGPU && (
