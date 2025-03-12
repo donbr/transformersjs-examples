@@ -88,10 +88,6 @@ When deploying to other platforms, ensure you configure:
 - **Model Loading**: Web Workers for non-blocking UI
 - **Acceleration**: WebGPU for supported models and browsers
 
-### Cross-Origin Isolation
-
-Many machine learning models require SharedArrayBuffer, which needs proper cross-origin isolation. The application is configured with the necessary headers for this functionality.
-
 ### Mobile Compatibility
 
 While the examples work well on desktop browsers with WebGPU support, mobile compatibility is still being investigated. Contributions and observations in this area are particularly welcome.
@@ -101,10 +97,8 @@ While the examples work well on desktop browsers with WebGPU support, mobile com
 This repository serves as a starting point for exploring TransformersJS capabilities. Some areas for further exploration:
 
 - Optimizing for mobile devices
-- Reducing model size for faster loading
-- Implementing progressive loading strategies
-- Custom model fine-tuning integration
-- Offline support with service workers
+- Investigate alternative loading strategies for hybride online / offline use cases
+- Leveraging tools from the [HF ONNX Community](https://huggingface.co/onnx-community) to convert add models
 
 ## 🙏 Credits
 
