@@ -76,7 +76,7 @@ function App() {
         </a>{" "}
         and{" "}
         <a
-          href="http://huggingface.co/docs/transformers.js"
+          href="https://huggingface.co/docs/transformers.js"
           target="_blank"
           rel="noreferrer"
         >

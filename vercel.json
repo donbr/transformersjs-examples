@@ -16,6 +16,10 @@
         {
           "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self' https://huggingface.co; img-src 'self' https://huggingface.co; script-src 'self'; style-src 'self' 'unsafe-inline';"
         }
       ]
     },
