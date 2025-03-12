@@ -95,35 +95,36 @@ function App() {
   }, [status, task, image, text]);
 
   return IS_WEBGPU_AVAILABLE ? (
-    <div className="h-screen w-screen text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900">
-      <div className="flex flex-col mx-auto items justify-end max-w-[630px] h-full">
-        {status === "loading" && (
-          <div className="flex justify-center items-center fixed w-screen h-screen bg-black z-10 bg-opacity-[92%] top-0 left-0">
-            <div className="w-[500px]">
-              <p className="text-center mb-1 text-white text-md">
-                {loadingMessage}
-              </p>
-              {progressItems.map(({ file, progress, total }, i) => (
-                <Progress
-                  key={i}
-                  text={file}
-                  percentage={progress}
-                  total={total}
-                />
-              ))}
-            </div>
+    <div className="demo-container bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+      {status === "loading" && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black z-10 bg-opacity-[92%]">
+          <div className="w-full max-w-[500px]">
+            <p className="text-center mb-1 text-white text-md">
+              {loadingMessage}
+            </p>
+            {progressItems.map(({ file, progress, total }, i) => (
+              <Progress
+                key={i}
+                text={file}
+                percentage={progress}
+                total={total}
+              />
+            ))}
           </div>
-        )}
-        <div className="h-full overflow-auto scrollbar-thin flex justify-center items-center flex-col relative">
-          <div className="flex flex-col items-center mb-1 text-center">
-            <h1 className="text-6xl font-bold mb-2">Florence-2 WebGPU</h1>
+        </div>
+      )}
+      
+      <div className="demo-scroll-area flex justify-center items-start py-8 px-4">
+        <div className="w-full max-w-[800px]">
+          <div className="text-center mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">Florence-2 WebGPU</h1>
             <h2 className="text-xl font-semibold">
               Powerful vision foundation model running locally in your browser.
             </h2>
           </div>
 
-          <div className="w-full min-h-[220px] flex flex-col justify-center items-center p-2">
-            <p className="mb-2">
+          <div className="w-full flex flex-col justify-center items-center">
+            <p className="mb-6 max-w-[700px]">
               You are about to download{" "}
               <a
                 href="https://huggingface.co/onnx-community/Florence-2-base-ft"
@@ -154,12 +155,12 @@ function App() {
               model has loaded!
             </p>
 
-            <div className="flex w-full justify-around m-4">
-              <div className="flex flex-col gap-2 w-full max-w-[48%]">
+            <div className="flex flex-col md:flex-row w-full gap-4 mb-6">
+              <div className="flex flex-col gap-4 w-full md:w-1/2">
                 <div className="flex flex-col">
-                  <span className="text-sm mb-0.5">Task</span>
+                  <span className="text-sm mb-1">Task</span>
                   <select
-                    className="border rounded-md p-1 dark:bg-gray-800"
+                    className="border rounded-md p-2 dark:bg-gray-800"
                     value={task}
                     onChange={(e) => setTask(e.target.value)}
                   >
@@ -177,17 +178,10 @@ function App() {
                     <option value="<CAPTION_TO_PHRASE_GROUNDING>">
                       Caption to Phrase Grounding
                     </option>
-                    {/* <option value="<REFERRING_EXPRESSION_SEGMENTATION>">Referring Expression Segmentation</option> */}
-                    {/* <option value="<REGION_TO_SEGMENTATION>">Region to Segmentation</option> */}
-                    {/* <option value="<OPEN_VOCABULARY_DETECTION>">Open Vocabulary Detection</option> */}
-                    {/* <option value="<REGION_TO_CATEGORY>">Region to Category</option> */}
-                    {/* <option value="<REGION_TO_DESCRIPTION>">Region to Description</option> */}
-                    {/* <option value="<REGION_TO_OCR>">Region to OCR</option> */}
-                    {/* <option value="<REGION_PROPOSAL>">Region Proposal</option> */}
                   </select>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm mb-0.5">Input Image</span>
+                  <span className="text-sm mb-1">Input Image</span>
                   <ImageInput
                     className="flex flex-col items-center border border-gray-300 rounded-md cursor-pointer h-[250px]"
                     onImageChange={(file, result) => {
@@ -198,12 +192,12 @@ function App() {
                   />
                 </div>
               </div>
-              <div className="flex flex-col gap-2 w-full max-w-[48%] justify-end">
+              <div className="flex flex-col gap-4 w-full md:w-1/2">
                 {task === "<CAPTION_TO_PHRASE_GROUNDING>" && (
                   <div className="flex flex-col">
-                    <span className="text-sm mb-0.5">Text input</span>
+                    <span className="text-sm mb-1">Text input</span>
                     <input
-                      className="border rounded-md px-2 py-[3.5px]"
+                      className="border rounded-md px-3 py-2 dark:bg-gray-800"
                       value={text}
                       onChange={(e) => setText(e.target.value)}
                     />
@@ -211,8 +205,8 @@ function App() {
                 )}
 
                 <div className="flex flex-col relative">
-                  <span className="text-sm mb-0.5">Output</span>
-                  <div className="flex justify-center border border-gray-300 rounded-md h-[250px]">
+                  <span className="text-sm mb-1">Output</span>
+                  <div className="flex justify-center border border-gray-300 rounded-md h-[250px] bg-white dark:bg-gray-800">
                     {result?.[task] && (
                       <>
                         {typeof result[task] === "string" ? (
@@ -225,7 +219,7 @@ function App() {
                           </pre>
                         )}
                         {time && (
-                          <p className="text-sm text-gray-500 absolute bottom-2 bg-white p-1 rounded border">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 absolute bottom-2 bg-white dark:bg-gray-700 p-1 rounded border">
                             Execution time: {time.toFixed(2)} ms
                           </p>
                         )}
@@ -237,7 +231,7 @@ function App() {
             </div>
 
             <button
-              className="border px-4 py-2 rounded-lg bg-blue-400 text-white hover:bg-blue-500 disabled:bg-blue-100 disabled:cursor-not-allowed select-none cursor-pointer"
+              className="border px-6 py-3 rounded-lg bg-blue-400 text-white hover:bg-blue-500 disabled:bg-blue-100 disabled:cursor-not-allowed select-none cursor-pointer"
               onClick={handleClick}
               disabled={
                 status === "running" || (status !== null && image === null)
@@ -254,7 +248,7 @@ function App() {
       </div>
     </div>
   ) : (
-    <div className="fixed w-screen h-screen bg-black z-10 bg-opacity-[92%] text-white text-2xl font-semibold flex justify-center items-center text-center">
+    <div className="fixed inset-0 bg-black z-10 bg-opacity-[92%] text-white text-2xl font-semibold flex justify-center items-center text-center">
       WebGPU is not supported
       <br />
       by this browser :&#40;

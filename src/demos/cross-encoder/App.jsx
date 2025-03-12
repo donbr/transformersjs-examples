@@ -61,83 +61,112 @@ function App() {
   const busy = status !== "idle";
 
   return (
-    <div className="flex flex-col h-screen w-screen p-8">
-      <h1 className="text-2xl md:text-4xl font-bold text-center mb-1">
-        Reranking w/ The Crispy mixedbread Rerank Models
-      </h1>
-      <p className="text-lg md:text-xl font-medium text-center mb-2">
-        Powered by{" "}
-        <a
-          href="https://huggingface.co/mixedbread-ai/mxbai-rerank-xsmall-v1"
-          target="_blank"
-          rel="noreferrer"
-        >
-          mxbai-rerank-xsmall-v1
-        </a>{" "}
-        and{" "}
-        <a
-          href="https://huggingface.co/docs/transformers.js"
-          target="_blank"
-          rel="noreferrer"
-        >
-          🤗 Transformers.js
-        </a>
-      </p>
-      <div className="flex-grow flex flex-wrap p-4">
-        <div className="flex flex-col items-center gap-y-1 w-full md:w-1/2">
-          <label className="text-lg font-medium">Query</label>
-          <textarea
-            placeholder="Enter query."
-            className="border w-full p-1 resize-none overflow-hidden h-10"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setResults([]);
-            }}
-          ></textarea>
-          <label className="text-lg font-medium mt-1">Documents</label>
-          <textarea
-            placeholder="Enter documents to compare with the query. One sentence per line."
-            className="border w-full p-1 h-full resize-none"
-            value={documents}
-            onChange={(e) => {
-              setDocuments(e.target.value);
-              setResults([]);
-            }}
-          ></textarea>
-
-          <button
-            className="border py-1 px-2 bg-green-400 rounded text-white text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            disabled={busy}
-            onClick={run}
-          >
-            {!busy
-              ? "Rerank"
-              : status === "loading"
-                ? "Model loading..."
-                : "Processing"}
-          </button>
-        </div>
-        <div className="flex flex-col items-center w-full md:w-1/2 gap-y-1">
-          {results.length > 0 && (
-            <>
-              <div className="w-full flex flex-col gap-y-1">
-                <label className="text-lg font-medium text-center">
-                  Results
-                </label>
-                <div className="flex flex-col gap-y-1">
-                  {results.map((result, i) => (
-                    <div key={i} className="flex gap-x-2 border mx-2 p-1">
-                      <span className="font-bold">
-                        {result.score.toFixed(3)}
-                      </span>
-                      <span>{result.text}</span>
-                    </div>
-                  ))}
-                </div>
+    <div className="demo-container bg-white">
+      <div className="demo-scroll-area p-4">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-2xl md:text-4xl font-bold text-center mb-2">
+            Reranking w/ The Crispy mixedbread Rerank Models
+          </h1>
+          <p className="text-lg md:text-xl font-medium text-center mb-6">
+            Powered by{" "}
+            <a
+              href="https://huggingface.co/mixedbread-ai/mxbai-rerank-xsmall-v1"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 hover:text-blue-800"
+            >
+              mxbai-rerank-xsmall-v1
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://huggingface.co/docs/transformers.js"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 hover:text-blue-800"
+            >
+              🤗 Transformers.js
+            </a>
+          </p>
+          
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Input section */}
+            <div className="flex flex-col gap-4 w-full md:w-1/2">
+              <div>
+                <label className="block text-lg font-medium mb-2">Query</label>
+                <textarea
+                  placeholder="Enter query."
+                  className="border rounded-md w-full p-3 resize-none h-20"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setResults([]);
+                  }}
+                ></textarea>
               </div>
-            </>
-          )}
+              
+              <div className="flex-grow flex flex-col">
+                <label className="block text-lg font-medium mb-2">Documents</label>
+                <textarea
+                  placeholder="Enter documents to compare with the query. One sentence per line."
+                  className="border rounded-md w-full p-3 flex-grow resize-none min-h-[300px]"
+                  value={documents}
+                  onChange={(e) => {
+                    setDocuments(e.target.value);
+                    setResults([]);
+                  }}
+                ></textarea>
+              </div>
+
+              <div className="flex justify-center mt-4">
+                <button
+                  className={`py-2 px-6 rounded-lg text-white text-lg font-medium ${
+                    busy
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-500 hover:bg-green-600 cursor-pointer"
+                  }`}
+                  disabled={busy}
+                  onClick={run}
+                >
+                  {!busy
+                    ? "Rerank"
+                    : status === "loading"
+                      ? "Model loading..."
+                      : "Processing"}
+                </button>
+              </div>
+            </div>
+            
+            {/* Results section */}
+            <div className="w-full md:w-1/2">
+              <div className="sticky top-4">
+                <h2 className="text-lg font-medium mb-3 text-center">Results</h2>
+                {results.length > 0 ? (
+                  <div className="border rounded-md bg-gray-50 p-4">
+                    <div className="flex flex-col gap-3">
+                      {results.map((result, i) => (
+                        <div 
+                          key={i} 
+                          className="flex gap-3 p-3 bg-white rounded-md shadow-sm border-l-4"
+                          style={{
+                            borderLeftColor: `rgba(22, 163, 74, ${result.score})`,
+                          }}
+                        >
+                          <span className="font-bold min-w-[60px] text-green-700">
+                            {result.score.toFixed(3)}
+                          </span>
+                          <span>{result.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500 border rounded-md p-8 bg-gray-50">
+                    {busy ? "Processing..." : "No results yet. Click 'Rerank' to process."}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -187,16 +187,17 @@ function App() {
   }, [messages, isRunning]);
 
   return IS_WEBGPU_AVAILABLE ? (
-    <div className="flex flex-col h-screen mx-auto items justify-end text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900">
+    <div className="demo-container bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       {status === null && messages.length === 0 && (
-        <div className="h-full overflow-auto scrollbar-thin flex justify-center items-center flex-col relative">
-          <div className="flex flex-col items-center mb-1 max-w-[300px] text-center">
+        <div className="demo-scroll-area flex justify-center items-center flex-col px-4">
+          <div className="flex flex-col items-center mb-4 max-w-[300px] text-center">
             <img
               src="logo.png"
               width="85%"
               height="auto"
               className="block"
-            ></img>
+              alt="Phi logo"
+            />
             <h1 className="text-4xl font-bold mb-1">Phi-3.5 WebGPU</h1>
             <h2 className="font-semibold">
               A private and powerful AI chatbot
@@ -205,12 +206,12 @@ function App() {
             </h2>
           </div>
 
-          <div className="flex flex-col items-center px-4">
-            <p className="max-w-[514px] mb-4">
+          <div className="flex flex-col items-center max-w-lg w-full">
+            <p className="mb-4">
               <br />
               You are about to load{" "}
               <a
-                href="onnx-community/Phi-3.5-mini-instruct-onnx-web"
+                href="https://huggingface.co/onnx-community/Phi-3.5-mini-instruct-onnx-web"
                 target="_blank"
                 rel="noreferrer"
                 className="font-medium underline"
@@ -269,9 +270,10 @@ function App() {
           </div>
         </div>
       )}
+      
       {status === "loading" && (
-        <>
-          <div className="w-full max-w-[500px] text-left mx-auto p-4 bottom-0 mt-auto">
+        <div className="demo-scroll-area flex justify-center items-center">
+          <div className="w-full max-w-[500px] text-left mx-auto p-4">
             <p className="text-center mb-1">{loadingMessage}</p>
             {progressItems.map(({ file, progress, total }, i) => (
               <Progress
@@ -282,17 +284,17 @@ function App() {
               />
             ))}
           </div>
-        </>
+        </div>
       )}
 
       {status === "ready" && (
         <div
           ref={chatContainerRef}
-          className="overflow-y-auto scrollbar-thin w-full flex flex-col items-center h-full"
+          className="demo-scroll-area flex flex-col items-center"
         >
           <Chat messages={messages} />
           {messages.length === 0 && (
-            <div>
+            <div className="max-w-lg w-full">
               {EXAMPLES.map((msg, i) => (
                 <div
                   key={i}
@@ -304,7 +306,7 @@ function App() {
               ))}
             </div>
           )}
-          <p className="text-center text-sm min-h-6 text-gray-500 dark:text-gray-300">
+          <p className="text-center text-sm min-h-6 text-gray-500 dark:text-gray-300 mt-2">
             {tps && messages.length > 0 && (
               <>
                 {!isRunning && (
@@ -343,54 +345,57 @@ function App() {
         </div>
       )}
 
-      <div className="mt-2 border dark:bg-gray-700 rounded-lg w-[600px] max-w-[80%] max-h-[200px] mx-auto relative mb-3 flex">
-        <textarea
-          ref={textareaRef}
-          className="scrollbar-thin w-[550px] dark:bg-gray-700 px-3 py-4 rounded-lg bg-transparent border-none outline-none text-gray-800 disabled:text-gray-400 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 disabled:placeholder-gray-200 resize-none disabled:cursor-not-allowed"
-          placeholder="Type your message..."
-          type="text"
-          rows={1}
-          value={input}
-          disabled={status !== "ready"}
-          title={status === "ready" ? "Model is ready" : "Model not loaded yet"}
-          onKeyDown={(e) => {
-            if (
-              input.length > 0 &&
-              !isRunning &&
-              e.key === "Enter" &&
-              !e.shiftKey
-            ) {
-              e.preventDefault(); // Prevent default behavior of Enter key
-              onEnter(input);
-            }
-          }}
-          onInput={(e) => setInput(e.target.value)}
-        />
-        {isRunning ? (
-          <div className="cursor-pointer" onClick={onInterrupt}>
-            <StopIcon className="h-8 w-8 p-1 rounded-md text-gray-800 dark:text-gray-100 absolute right-3 bottom-3" />
-          </div>
-        ) : input.length > 0 ? (
-          <div className="cursor-pointer" onClick={() => onEnter(input)}>
-            <ArrowRightIcon
-              className={`h-8 w-8 p-1 bg-gray-800 dark:bg-gray-100 text-white dark:text-black rounded-md absolute right-3 bottom-3`}
-            />
-          </div>
-        ) : (
-          <div>
-            <ArrowRightIcon
-              className={`h-8 w-8 p-1 bg-gray-200 dark:bg-gray-600 text-gray-50 dark:text-gray-800 rounded-md absolute right-3 bottom-3`}
-            />
-          </div>
-        )}
-      </div>
+      {/* Input area - always at the bottom */}
+      <div className="demo-footer p-4">
+        <div className="border dark:bg-gray-700 rounded-lg w-full max-w-[600px] mx-auto relative flex">
+          <textarea
+            ref={textareaRef}
+            className="scrollbar-thin w-full dark:bg-gray-700 px-3 py-4 rounded-lg bg-transparent border-none outline-none text-gray-800 disabled:text-gray-400 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 disabled:placeholder-gray-200 resize-none disabled:cursor-not-allowed"
+            placeholder="Type your message..."
+            type="text"
+            rows={1}
+            value={input}
+            disabled={status !== "ready"}
+            title={status === "ready" ? "Model is ready" : "Model not loaded yet"}
+            onKeyDown={(e) => {
+              if (
+                input.length > 0 &&
+                !isRunning &&
+                e.key === "Enter" &&
+                !e.shiftKey
+              ) {
+                e.preventDefault(); // Prevent default behavior of Enter key
+                onEnter(input);
+              }
+            }}
+            onInput={(e) => setInput(e.target.value)}
+          />
+          {isRunning ? (
+            <div className="cursor-pointer" onClick={onInterrupt}>
+              <StopIcon className="h-8 w-8 p-1 rounded-md text-gray-800 dark:text-gray-100 absolute right-3 bottom-3" />
+            </div>
+          ) : input.length > 0 ? (
+            <div className="cursor-pointer" onClick={() => onEnter(input)}>
+              <ArrowRightIcon
+                className={`h-8 w-8 p-1 bg-gray-800 dark:bg-gray-100 text-white dark:text-black rounded-md absolute right-3 bottom-3`}
+              />
+            </div>
+          ) : (
+            <div>
+              <ArrowRightIcon
+                className={`h-8 w-8 p-1 bg-gray-200 dark:bg-gray-600 text-gray-50 dark:text-gray-800 rounded-md absolute right-3 bottom-3`}
+              />
+            </div>
+          )}
+        </div>
 
-      <p className="text-xs text-gray-400 text-center mb-3">
-        Disclaimer: Generated content may be inaccurate or false.
-      </p>
+        <p className="text-xs text-gray-400 text-center mt-2">
+          Disclaimer: Generated content may be inaccurate or false.
+        </p>
+      </div>
     </div>
   ) : (
-    <div className="fixed w-screen h-screen bg-black z-10 bg-opacity-[92%] text-white text-2xl font-semibold flex justify-center items-center text-center">
+    <div className="fixed inset-0 bg-black z-10 bg-opacity-[92%] text-white text-2xl font-semibold flex justify-center items-center text-center">
       WebGPU is not supported
       <br />
       by this browser :&#40;

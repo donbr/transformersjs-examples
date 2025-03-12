@@ -236,7 +236,7 @@ function App() {
   }, [messages, isRunning]);
 
   return IS_WEBGPU_AVAILABLE ? (
-    <div className="flex flex-col h-screen mx-auto items justify-end text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900">
+    <div className="flex flex-col h-full mx-auto items justify-end text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900">
       {(status === null || status === "idle") && messages.length === 0 && (
         <div className="h-full overflow-auto scrollbar-thin flex justify-center items-center flex-col relative">
           <div className="flex flex-col items-center mb-1 max-w-[350px] text-center">
@@ -316,7 +316,7 @@ function App() {
       )}
       {status === "loading" && (
         <>
-          <div className="w-full max-w-[500px] text-left mx-auto p-4 bottom-0 mt-auto">
+          <div className="flex flex-col w-full max-w-[500px] text-left mx-auto p-4 bottom-0 mt-auto">
             <p className="text-center mb-1">{loadingMessage}</p>
             {progressItems.map(({ file, progress, total }, i) => (
               <Progress
@@ -331,9 +331,11 @@ function App() {
       )}
 
       {status === "ready" && (
+        // For each demo that has a chat container (Llama, Phi, Janus)
+        // Example for Phi
         <div
           ref={chatContainerRef}
-          className="overflow-y-auto scrollbar-thin w-full flex flex-col items-center h-full"
+          className="overflow-y-auto scrollbar-thin w-full flex flex-col items-center content-with-header"
         >
           <Chat messages={messages} />
           {messages.length === 0 && !image && (
@@ -501,7 +503,7 @@ function App() {
       </p>
     </div>
   ) : (
-    <div className="fixed w-screen h-screen bg-black z-10 bg-opacity-[92%] text-white text-2xl font-semibold flex justify-center items-center text-center">
+    <div className="fixed inset-0 bg-black z-10 bg-opacity-[92%] text-white text-2xl font-semibold flex justify-center items-center text-center">
       WebGPU is not supported
       <br />
       by this browser :&#40;

@@ -105,97 +105,136 @@ function App() {
   const busy = status !== "idle";
 
   return (
-    <div className="flex flex-col h-screen w-screen p-1">
-      <textarea
-        className="border w-full p-1 h-1/2"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      ></textarea>
-      <div className="flex flex-col justify-center items-center m-2 gap-1">
-        <button
-          className="border py-1 px-2 bg-blue-400 rounded text-white text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          disabled={busy}
-          onClick={classify}
-        >
-          {!busy
-            ? "Categorize"
-            : status === "loading"
-              ? "Model loading..."
-              : "Processing"}
-        </button>
-        <div className="flex gap-1">
-          <button
-            className="border py-1 px-2 bg-green-400 rounded text-white text-sm font-medium cursor-pointer"
-            onClick={(e) => {
-              setSections((sections) => {
-                const newSections = [...sections];
-                // add at position 2 from the end
-                newSections.splice(newSections.length - 1, 0, {
-                  title: "New Category",
-                  items: [],
-                });
-                return newSections;
-              });
-            }}
-          >
-            Add category
-          </button>
-          <button
-            className="border py-1 px-2 bg-red-400 rounded text-white text-sm font-medium cursor-pointer"
-            disabled={sections.length <= 1}
-            onClick={(e) => {
-              setSections((sections) => {
-                const newSections = [...sections];
-                newSections.splice(newSections.length - 2, 1); // Remove second last element
-                return newSections;
-              });
-            }}
-          >
-            Remove category
-          </button>
-          <button
-            className="border py-1 px-2 bg-orange-400 rounded text-white text-sm font-medium cursor-pointer"
-            onClick={(e) => {
-              setSections((sections) =>
-                sections.map((section) => ({
-                  ...section,
-                  items: [],
-                })),
-              );
-            }}
-          >
-            Clear
-          </button>
+    <div className="demo-container bg-white">
+      <div className="demo-scroll-area flex flex-col h-full">
+        <div className="p-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-2">
+            Zero-Shot Classification
+          </h1>
+          <p className="text-center mb-4">
+            Categorize text without specific training
+          </p>
         </div>
-      </div>
-
-      <div className="flex justify-between flex-grow overflow-x-auto max-h-[40%]">
-        {sections.map((section, index) => (
-          <div key={index} className="flex flex-col w-full">
-            <input
-              disabled={section.title === "Other"}
-              className="w-full border px-1 text-center"
-              value={section.title}
-              onChange={(e) => {
-                setSections((sections) => {
-                  const newSections = [...sections];
-                  newSections[index].title = e.target.value;
-                  return newSections;
-                });
-              }}
-            ></input>
-            <div className="overflow-y-auto h-full border">
-              {section.items.map((item, index) => (
-                <div
-                  className="m-2 border bg-red-50 rounded p-1 text-sm"
-                  key={index}
+        
+        <div className="flex flex-col md:flex-row h-full p-4 gap-4">
+          {/* Input area */}
+          <div className="w-full md:w-1/2 flex flex-col">
+            <label className="font-medium mb-2">Input Text</label>
+            <textarea
+              className="border rounded-md p-3 w-full flex-grow resize-none"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Enter text to classify"
+            ></textarea>
+          </div>
+          
+          {/* Control and output area */}
+          <div className="w-full md:w-1/2 flex flex-col">
+            <div className="flex flex-col mb-4">
+              <div className="flex justify-center gap-2 mb-4">
+                <button
+                  className={`py-2 px-6 rounded-lg text-white font-medium ${
+                    busy
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                  }`}
+                  disabled={busy}
+                  onClick={classify}
                 >
-                  {item}
+                  {!busy
+                    ? "Categorize"
+                    : status === "loading"
+                      ? "Model loading..."
+                      : "Processing"}
+                </button>
+              </div>
+              
+              <div className="flex justify-center gap-2 mb-2">
+                <button
+                  className="py-1 px-3 rounded text-white text-sm font-medium bg-green-500 hover:bg-green-600"
+                  onClick={() => {
+                    setSections((sections) => {
+                      const newSections = [...sections];
+                      newSections.splice(newSections.length - 1, 0, {
+                        title: "New Category",
+                        items: [],
+                      });
+                      return newSections;
+                    });
+                  }}
+                >
+                  Add category
+                </button>
+                <button
+                  className="py-1 px-3 rounded text-white text-sm font-medium bg-red-500 hover:bg-red-600"
+                  disabled={sections.length <= 1}
+                  onClick={() => {
+                    setSections((sections) => {
+                      const newSections = [...sections];
+                      newSections.splice(newSections.length - 2, 1);
+                      return newSections;
+                    });
+                  }}
+                >
+                  Remove category
+                </button>
+                <button
+                  className="py-1 px-3 rounded text-white text-sm font-medium bg-orange-500 hover:bg-orange-600"
+                  onClick={() => {
+                    setSections((sections) =>
+                      sections.map((section) => ({
+                        ...section,
+                        items: [],
+                      })),
+                    );
+                  }}
+                >
+                  Clear results
+                </button>
+              </div>
+            </div>
+            
+            {/* Categories */}
+            <div className="flex-grow flex flex-col">
+              <label className="font-medium mb-2">Categories</label>
+              <div className="border rounded-md flex-grow flex overflow-hidden">
+                <div className="flex w-full overflow-x-auto h-full">
+                  {sections.map((section, index) => (
+                    <div key={index} className="flex flex-col min-w-[200px] w-full border-r last:border-r-0">
+                      <input
+                        disabled={section.title === "Other"}
+                        className="w-full border-b px-2 py-1 text-center font-medium bg-gray-50"
+                        value={section.title}
+                        onChange={(e) => {
+                          setSections((sections) => {
+                            const newSections = [...sections];
+                            newSections[index].title = e.target.value;
+                            return newSections;
+                          });
+                        }}
+                      />
+                      <div className="overflow-y-auto flex-grow p-1">
+                        {section.items.map((item, itemIndex) => (
+                          <div
+                            className="m-1 border bg-gray-50 rounded p-2 text-sm shadow-sm hover:bg-gray-100"
+                            key={itemIndex}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                        {section.items.length === 0 && (
+                          <div className="text-center text-gray-400 p-4 text-sm">
+                            No items yet
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
