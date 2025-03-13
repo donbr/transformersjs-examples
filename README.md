@@ -15,16 +15,16 @@ This repository contains a collection of example applications demonstrating the 
 
 The application includes examples for various machine learning tasks:
 
-| Model | Description | WebGPU |
-|-------|-------------|--------|
-| Llama 3.2 | Text generation using Llama 3.2 | ⚡ Required |
-| Phi 3.5 | Text generation using Phi 3.5 | ⚡ Required |
-| Janus | Multimodal text generation with image capabilities | ⚡ Required |
-| Florence 2 | Vision model for image understanding and captioning | ⚡ Required |
-| Cross Encoder | Text similarity and relevance scoring | No |
-| Zero-Shot Classification | Classify text without specific training | No |
-| SpeechT5 | Convert text to speech | No |
-| Text-to-Speech | Generate speech from text with acceleration | ⚡ Required |
+| Model | Description | Model ID | WebGPU |
+|-------|-------------|----------|--------|
+| Llama 3.2 | Text generation using Llama 3.2 | onnx-community/Llama-3.2-1B-Instruct-q4f16 | ⚡ Required |
+| Phi 3.5 | Text generation using Phi 3.5 | onnx-community/Phi-3.5-mini-instruct-onnx-web | ⚡ Required |
+| Janus | Multimodal text generation with image capabilities | onnx-community/Janus-1.3B-ONNX | ⚡ Required |
+| Florence 2 | Vision model for image understanding and captioning | onnx-community/Florence-2-base-ft | ⚡ Required |
+| Cross Encoder | Text similarity and relevance scoring | mixedbread-ai/mxbai-rerank-xsmall-v1 | No |
+| Zero-Shot Classification | Classify text without specific training | MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33 | No |
+| SpeechT5 | Convert text to speech | Xenova/speecht5_tts | No |
+| Text-to-Speech | Generate speech from text with acceleration | onnx-community/OuteTTS-0.2-500M | ⚡ Required |
 
 ## 🚀 Getting Started
 
