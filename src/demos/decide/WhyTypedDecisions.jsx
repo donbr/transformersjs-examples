@@ -17,8 +17,9 @@ function Pill({ kind }) {
   );
 }
 
-function Stat({ children }) {
-  return <span className="font-mono text-sm bg-gray-100 px-1.5 rounded whitespace-nowrap">{children}</span>;
+function Stat({ tone = "gray", children }) {
+  const colors = tone === "amber" ? "bg-amber-100 text-amber-900" : "bg-gray-100";
+  return <span className={`font-mono text-sm px-1.5 rounded whitespace-nowrap ${colors}`}>{children}</span>;
 }
 
 function Section({ title, pill, children }) {
@@ -35,7 +36,7 @@ function Section({ title, pill, children }) {
 
 function Link({ href, children }) {
   return (
-    <a href={href} target="_blank" rel="noreferrer" className="text-blue-700 underline hover:text-blue-900">
+    <a href={href} target="_blank" rel="noreferrer" className="text-blue-600 underline underline-offset-2 hover:text-blue-800">
       {children}
     </a>
   );
@@ -50,14 +51,14 @@ export default function WhyTypedDecisions({ target, threshold, testStats }) {
   const notMeasured = <Stat>not measured for these labels</Stat>;
 
   return (
-    <details className="group">
+    <details className="group mt-8 border-t border-gray-200 pt-6">
       <summary className="min-h-[44px] cursor-pointer list-none rounded-md py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
         <span className="flex items-center gap-2 text-xl font-semibold text-gray-800">
           Why typed decisions?
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            className="h-5 w-5 text-gray-500 transition-transform group-open:rotate-180"
+            className="h-5 w-5 text-gray-500 transition-transform motion-reduce:transition-none group-open:rotate-180"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -123,11 +124,15 @@ export default function WhyTypedDecisions({ target, threshold, testStats }) {
           </p>
         </Section>
 
-        <div className="md:col-span-2 bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r">
+        <div className="md:col-span-2 bg-amber-50 border-l-4 border-amber-400 p-4">
           <Section title="Honest limits" pill="measured">
             <p>
               The guarantee bounds error over routed tickets, not for each kind of ticket: at ≤{target}%,{" "}
-              {measured ? <Stat>{pct(testStats.leakNear)} of credit-card questions</Stat> : notMeasured} still get
+              {measured ? (
+                <Stat tone="amber">{pct(testStats.leakNear)} of credit-card questions</Stat>
+              ) : (
+                <Stat tone="amber">not measured for these labels</Stat>
+              )} still get
               routed to a banking queue. CLINC150 is a clean benchmark, not real tickets. Labels need tuning for each
               queue, and real traffic drifts, so recalibrate on it.
             </p>
