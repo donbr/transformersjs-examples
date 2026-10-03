@@ -6,6 +6,7 @@ import HomePage from './HomePage';
 // Dynamic imports for each example
 const CrossEncoderDemo = React.lazy(() => import('./demos/cross-encoder/App'));
 const ZeroShotDemo = React.lazy(() => import('./demos/zero-shot/App'));
+const DecideDemo = React.lazy(() => import('./demos/decide/App'));
 
 function App() {
   // Define header content
@@ -32,6 +33,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/cross-encoder" element={<CrossEncoderDemo />} />
             <Route path="/zero-shot" element={<ZeroShotDemo />} />
+            <Route path="/decide" element={<DecideDemo />} />
           </Routes>
         </React.Suspense>
       </div>
