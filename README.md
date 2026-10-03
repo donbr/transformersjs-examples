@@ -72,6 +72,8 @@ Hosts that cannot set response headers, such as GitHub Pages, still run the demo
 │   ├── App.jsx         # Main application with routing
 │   ├── Layout.jsx      # App shell (header, scrolling content area, footer)
 │   └── HomePage.jsx    # Directory of available demos
+├── docs/decide.md      # /decide method, results, lessons and sources
+├── tools/decide-calibration/  # Rebuild and check /decide's calibration data
 ├── index.html          # HTML entry point
 ├── vercel.json         # Deployment configuration for Vercel
 ├── vite.config.js      # Vite configuration

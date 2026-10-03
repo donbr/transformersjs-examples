@@ -1,0 +1,9 @@
+# Regenerable inputs and outputs (see README.md). Committed: the scripts,
+# decide_split.json, report.json and provenance.json.
+parquet/
+.cache/
+node_modules/
+clinc_banking.json
+scores-*.json
+*.bundle.mjs
+open-jev-pr.mjs
