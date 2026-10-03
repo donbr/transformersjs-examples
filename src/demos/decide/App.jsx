@@ -28,6 +28,8 @@ function Card({ accent, label, children, className = "" }) {
   );
 }
 
+const INITIAL_LOAD = { step: "info", loaded: 0, total: null, isCached: false };
+
 function LoadCard({ load }) {
   const warming = load.step === "warming";
   const cached = load.isCached;
@@ -247,9 +249,9 @@ function LabelsCard({ labels, editing, draft, setDraft, onEdit, onSave, onCancel
 }
 
 function App() {
-  const [load, setLoad] = useState({ step: "info", loaded: 0, total: null, isCached: false });
+  const [load, setLoad] = useState(INITIAL_LOAD);
   const [runtime, setRuntime] = useState(null);
-  const [status, setStatus] = useState("loading"); // loading | ready | deciding | failed
+  const [status, setStatus] = useState("loading"); // loading | load-error | ready | deciding | failed
   const [error, setError] = useState(null);
   const [ticket, setTicket] = useState(SAMPLES[0]);
   const [result, setResult] = useState(null);
@@ -306,7 +308,8 @@ function App() {
         case "error":
           setError(msg.error);
           setCalibrating(null);
-          setStatus((s) => (s === "loading" ? "failed" : "ready"));
+          // A failed load can be retried: the worker drops the rejected load promise.
+          setStatus((s) => (s === "loading" ? "load-error" : "ready"));
           break;
         default:
           break;
@@ -380,6 +383,14 @@ function App() {
     worker.current.postMessage({ type: "decide", id: requestId.current, text: ticket.trim(), labels });
   }, [canDecide, ticket, labels]);
 
+  const retryLoad = () => {
+    setError(null);
+    // Reset progress too: the reducer keeps the max loaded bytes seen so far.
+    setLoad(INITIAL_LOAD);
+    setStatus("loading");
+    worker.current.postMessage({ type: "load" });
+  };
+
   const recalibrate = () => {
     setError(null);
     runId.current += 1;
@@ -427,6 +438,24 @@ function App() {
           <div className="flex flex-col lg:flex-row gap-5 items-start">
             <div className="flex flex-col gap-5 w-full lg:flex-[3] min-w-0">
               {status === "loading" && <LoadCard load={load} />}
+              {status === "load-error" && (
+                <Card accent="border-red-500" label="Model load failed">
+                  <div className="flex flex-wrap justify-between items-center gap-3">
+                    <span className="font-semibold">The model could not be loaded</span>
+                    <button
+                      type="button"
+                      onClick={retryLoad}
+                      className="text-sm font-medium px-4 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    This is usually a network problem. Files that finished downloading are cached, so a retry only
+                    fetches the rest.
+                  </p>
+                </Card>
+              )}
 
               <Card accent="border-transparent" label="Ticket">
                 <label htmlFor="ticket" className="font-semibold">Support ticket</label>
@@ -459,6 +488,8 @@ function App() {
                   <span className="text-sm text-gray-500">
                     {status === "failed"
                       ? "The model is unavailable."
+                      : status === "load-error"
+                        ? "Decide unlocks once the model loads"
                       : ready
                         ? "Enter to decide · Shift+Enter for a new line"
                         : "Decide unlocks when the model is ready"}

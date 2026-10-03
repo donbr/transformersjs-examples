@@ -8,7 +8,14 @@ const WARMUP_TEXT = "what is my checking balance";
 // q4f16 needs WebGPU with shader-f16; otherwise q4, on WebGPU if present, else WASM.
 // The shipped calibration was computed with q4f16 on WebGPU.
 async function pickRuntime() {
-  const adapter = await self.navigator.gpu?.requestAdapter?.();
+  let adapter = null;
+  try {
+    adapter = await self.navigator.gpu?.requestAdapter?.();
+  } catch (error) {
+    // navigator.gpu can exist while requestAdapter() throws (blocklisted GPU,
+    // disabled flag); WASM still works, so fall back instead of failing the load.
+    console.warn("[decide] WebGPU adapter request failed; using WASM:", error);
+  }
   if (adapter?.features.has("shader-f16")) return { device: "webgpu", dtype: "q4f16" };
   if (adapter) return { device: "webgpu", dtype: "q4" };
   return { device: "wasm", dtype: "q4" };
