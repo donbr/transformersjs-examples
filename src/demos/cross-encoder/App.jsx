@@ -87,7 +87,7 @@ function App() {
   const busy = status !== "idle";
 
   return (
-    <div className="demo-container bg-white">
+    <div className="demo-container bg-white rounded-lg shadow-md">
       <div className="demo-scroll-area p-4">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl md:text-4xl font-bold text-center mb-2">
