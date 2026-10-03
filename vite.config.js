@@ -1,8 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// Same cross-origin isolation as vercel.json, so `vite` and `vite preview` run ONNX Runtime
+// multi-threaded like the deployed site (single-threaded runs hide pthread-only bugs).
+const isolationHeaders = {
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+};
+
 export default defineConfig({
   plugins: [react()],
+  server: { headers: isolationHeaders },
+  preview: { headers: isolationHeaders },
   worker: {
     format: 'es',
   },

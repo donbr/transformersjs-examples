@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Font family comes from Tailwind's default sans stack, as on donbr.github.io. */
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
@@ -36,6 +36,7 @@
 
 body {
   margin: 0;
+  @apply bg-gray-50; /* Page ground, as on donbr.github.io; demos keep their own surfaces. */
   min-height: var(--app-height);
   overflow: hidden; /* Prevent double scrollbars */
 }
