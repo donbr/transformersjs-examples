@@ -43,35 +43,39 @@ function App() {
   );
 
   const [status, setStatus] = useState("idle");
+  const [error, setError] = useState(null);
 
   // Create a reference to the worker object.
   const worker = useRef(null);
 
   // We use the `useEffect` hook to setup the worker as soon as the `App` component is mounted.
   useEffect(() => {
-    if (!worker.current) {
-      // Create the worker if it does not yet exist.
-      worker.current = new Worker(new URL("./worker.js", import.meta.url), {
-        type: "module",
-      });
-    }
+    // Create the worker if it does not yet exist.
+    worker.current ??= new Worker(new URL("./worker.js", import.meta.url), {
+      type: "module",
+    });
 
     // Create a callback function for messages from the worker thread.
     const onMessageReceived = (e) => {
       const status = e.data.status;
+      // A load can still report progress after the request already failed;
+      // don't let it leave idle.
       if (status === "initiate") {
-        setStatus("loading");
+        setStatus((s) => (s === "idle" ? s : "loading"));
       } else if (status === "ready") {
-        setStatus("ready");
+        setStatus((s) => (s === "idle" ? s : "ready"));
       } else if (status === "output") {
         const { sequence, labels, scores } = e.data.output;
 
         // Threshold for classification
         const label = scores[0] > 0.5 ? labels[0] : "Other";
 
-        const sectionID =
-          sections.map((x) => x.title).indexOf(label) ?? sections.length - 1;
+        // Look the label up in the latest sections: categories may have been
+        // renamed or removed since the request was sent. "Other" is always last.
         setSections((sections) => {
+          let sectionID = sections.findIndex((x) => x.title === label);
+          if (sectionID === -1) sectionID = sections.length - 1;
+
           const newSections = [...sections];
           newSections[sectionID] = {
             ...newSections[sectionID],
@@ -81,28 +85,41 @@ function App() {
         });
       } else if (status === "complete") {
         setStatus("idle");
+      } else if (status === "error") {
+        setError(e.data.error);
+        setStatus("idle");
       }
     };
 
+    // The worker itself failed (its script did not load, or it threw outside the
+    // message handler's try/catch). Stop it so no late message can change state.
+    const onWorkerError = (e) => {
+      e.preventDefault();
+      worker.current.terminate();
+      setError(
+        "The model worker stopped unexpectedly. Reload the page to try again.",
+      );
+      setStatus("failed");
+    };
+
     // Attach the callback function as an event listener.
-    const currentWorker = worker.current;
-    currentWorker.addEventListener("message", onMessageReceived);
+    worker.current.addEventListener("message", onMessageReceived);
+    worker.current.addEventListener("error", onWorkerError);
+    worker.current.addEventListener("messageerror", onWorkerError);
 
     // Define a cleanup function for when the component is unmounted.
-    return () =>
-      currentWorker.removeEventListener("message", onMessageReceived);
-  }, [sections]);
-
-  // Terminate the worker on unmount so its model is released instead of leaking.
-  // Kept separate from the effect above, which re-runs whenever `sections` changes.
-  useEffect(() => {
+    // Terminate the worker so its model is released instead of leaking.
     return () => {
-      worker.current?.terminate();
+      worker.current.removeEventListener("message", onMessageReceived);
+      worker.current.removeEventListener("error", onWorkerError);
+      worker.current.removeEventListener("messageerror", onWorkerError);
+      worker.current.terminate();
       worker.current = null;
     };
   }, []);
 
   const classify = useCallback(() => {
+    setError(null);
     setStatus("processing");
     worker.current.postMessage({
       text,
@@ -155,10 +172,18 @@ function App() {
                     ? "Categorize"
                     : status === "loading"
                       ? "Model loading..."
-                      : "Processing"}
+                      : status === "failed"
+                        ? "Unavailable"
+                        : "Processing"}
                 </button>
               </div>
-              
+
+              {error && (
+                <p className="text-center text-sm text-red-600 mb-4">
+                  Classification failed: {error}
+                </p>
+              )}
+
               <div className="flex justify-center gap-2 mb-2">
                 <button
                   className="py-1 px-3 rounded text-white text-sm font-medium bg-green-500 hover:bg-green-600"
@@ -176,8 +201,9 @@ function App() {
                   Add category
                 </button>
                 <button
-                  className="py-1 px-3 rounded text-white text-sm font-medium bg-red-500 hover:bg-red-600"
-                  disabled={sections.length <= 1}
+                  className="py-1 px-3 rounded text-white text-sm font-medium bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  // Keep at least one category besides "Other" so classify() has labels to send.
+                  disabled={sections.length <= 2}
                   onClick={() => {
                     setSections((sections) => {
                       const newSections = [...sections];

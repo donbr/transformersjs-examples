@@ -8,17 +8,17 @@ This repository contains a collection of example applications demonstrating the 
 
 - **Multiple Models in One App**: Collection of TransformersJS examples integrated in a single application
 - **Flexible Deployment Options**: Ready for Vercel, GitHub Pages, or your preferred hosting
-- **WebGPU Support**: Hardware acceleration for compatible browsers and models
+- **In-Browser Inference**: Models run client-side on WebAssembly (ONNX Runtime), with no backend
 - **Cross-Origin Isolation**: Properly configured headers for SharedArrayBuffer support
 
 ## 🧩 Included Models & Examples
 
 The application includes examples for various machine learning tasks:
 
-| Model | Description | Model ID | WebGPU |
-|-------|-------------|----------|--------|
-| Cross Encoder | Text similarity and relevance scoring | mixedbread-ai/mxbai-rerank-xsmall-v1 | No |
-| Zero-Shot Classification | Classify text without specific training | MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33 | No |
+| Model | Description | Model ID | Backend |
+|-------|-------------|----------|---------|
+| Cross Encoder | Text similarity and relevance scoring | mixedbread-ai/mxbai-rerank-xsmall-v1 | WASM |
+| Zero-Shot Classification | Classify text without specific training | MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33 | WASM |
 
 ## 🚀 Getting Started
 
@@ -67,7 +67,6 @@ When deploying to other platforms, ensure you configure:
 │   ├── demos/          # Individual model demos
 │   ├── App.jsx         # Main application with routing
 │   └── HomePage.jsx    # Directory of available demos
-├── public/             # Static assets
 ├── index.html          # HTML entry point
 ├── vercel.json         # Deployment configuration for Vercel
 ├── vite.config.js      # Vite configuration
@@ -80,11 +79,11 @@ When deploying to other platforms, ensure you configure:
 - **Styling**: Tailwind CSS
 - **Routing**: React Router with SPA routing
 - **Model Loading**: Web Workers for non-blocking UI
-- **Acceleration**: WebGPU for supported models and browsers
+- **Inference**: ONNX Runtime WebAssembly, multi-threaded when the page is cross-origin isolated
 
 ### Mobile Compatibility
 
-While the examples work well on desktop browsers with WebGPU support, mobile compatibility is still being investigated. Contributions and observations in this area are particularly welcome.
+While the examples work well on desktop browsers, mobile compatibility is still being investigated. Contributions and observations in this area are particularly welcome.
 
 ## 🔍 What's Next?
 
