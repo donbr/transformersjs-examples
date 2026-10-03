@@ -38,7 +38,7 @@ self.addEventListener("message", async (event) => {
       // Send the output back to the main thread
       self.postMessage({ status: "output", output });
     }
-    // Send the output back to the main thread
+    // Tell the main thread every line has been classified
     self.postMessage({ status: "complete" });
   } catch (error) {
     postError(error);

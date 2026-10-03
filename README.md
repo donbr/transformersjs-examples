@@ -7,7 +7,7 @@ This repository contains a collection of example applications demonstrating the 
 ## 🌟 Features
 
 - **Multiple Models in One App**: Collection of TransformersJS examples integrated in a single application
-- **Flexible Deployment Options**: Ready for Vercel, GitHub Pages, or your preferred hosting
+- **Deployment**: Configured for Vercel; other hosts work if they provide SPA routing and the COOP/COEP headers
 - **In-Browser Inference**: Models run client-side on WebAssembly (ONNX Runtime), with no backend
 - **Cross-Origin Isolation**: Properly configured headers for SharedArrayBuffer support
 
@@ -34,7 +34,7 @@ npm run dev
 
 ### Deployment Options
 
-This repository is configured for several deployment options:
+This repository is configured for Vercel. Other hosts need the same SPA rewrite and headers.
 
 #### Vercel Deployment
 
@@ -60,12 +60,16 @@ When deploying to other platforms, ensure you configure:
    - `Cross-Origin-Embedder-Policy: require-corp`
    - `Cross-Origin-Opener-Policy: same-origin`
 
+Hosts that cannot set response headers, such as GitHub Pages, still run the demos, but without cross-origin isolation ONNX Runtime falls back to single-threaded WASM. GitHub Pages also needs a `404.html` fallback for deep links and a Vite `base` for project sites; neither is set up here.
+
 ## 📋 Project Structure
 
 ```
 ├── src/                # Source code for the unified application
-│   ├── demos/          # Individual model demos
+│   ├── demos/          # Individual model demos (App.jsx UI + worker.js inference)
+│   ├── utils/          # Shared worker runtime and viewport-height fix
 │   ├── App.jsx         # Main application with routing
+│   ├── Layout.jsx      # App shell (header, scrolling content area, footer)
 │   └── HomePage.jsx    # Directory of available demos
 ├── index.html          # HTML entry point
 ├── vercel.json         # Deployment configuration for Vercel
@@ -90,8 +94,8 @@ While the examples work well on desktop browsers, mobile compatibility is still 
 This repository serves as a starting point for exploring TransformersJS capabilities. Some areas for further exploration:
 
 - Optimizing for mobile devices
-- Investigate alternative loading strategies for hybride online / offline use cases
-- Leveraging tools from the [HF ONNX Community](https://huggingface.co/onnx-community) to convert add models
+- Investigate alternative loading strategies for hybrid online / offline use cases
+- Leveraging tools from the [HF ONNX Community](https://huggingface.co/onnx-community) to convert and add models
 
 ## 🙏 Credits
 
@@ -119,7 +123,6 @@ graph TD
     A[Original TransformersJS Examples] --> B[Unified Application]
     B --> C{Deployment Options}
     C --> D[Vercel]
-    C --> E[GitHub Pages]
     C --> F[Custom Hosting]
     
     subgraph "Application Components"

@@ -35,8 +35,8 @@ class CrossEncoderSingleton {
 // Listen for messages from the main thread
 self.addEventListener("message", async (event) => {
   try {
-    // Retrieve the pipeline. When called for the first time,
-    // this will load the pipeline and save it for future use.
+    // Retrieve the tokenizer and model. When called for the first time,
+    // this will load them and save them for future use.
     const [tokenizer, model] =
       await CrossEncoderSingleton.getInstance(forwardProgress);
 
