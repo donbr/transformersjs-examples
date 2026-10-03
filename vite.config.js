@@ -7,7 +7,7 @@ export default defineConfig({
     format: 'es',
   },
   build: {
-    target: 'es2022', // Allow top-level await in workers
+    target: 'es2022',
     assetsInlineLimit: 0, // Don't inline any assets into JS
     reportCompressedSize: false, // Speed up build
     rollupOptions: {

@@ -23,7 +23,7 @@ function App() {
 
   // We use the `useEffect` hook to setup the worker as soon as the `App` component is mounted.
   useEffect(() => {
-    // Create the worker if it does not yet exist.
+    // Create a fresh worker per mount; the cleanup below terminates it.
     worker.current ??= new Worker(new URL("./worker.js", import.meta.url), {
       type: "module",
     });
