@@ -1,15 +1,24 @@
 import { env } from "@huggingface/transformers";
+// The standalone ONNX Runtime files, emitted next to the worker as same-origin assets.
+// They resolve to the onnxruntime-web copy transformers.js depends on, so their
+// version always matches the runtime API bundled into the worker.
+import ortMjsUrl from "onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url";
+import ortWasmUrl from "onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm?url";
 
-// transformers.js points ONNX Runtime at jsDelivr for its wasm binary, while Vite
-// already bundles the same asyncify build next to the worker. Clearing wasmPaths
-// lets ONNX Runtime load that same-origin copy instead, using the factory embedded
-// in its bundle (no .mjs request). This also skips transformers.js's own wasm cache
-// pre-load, so the binary relies on HTTP caching of /assets (see vercel.json).
-// Safari < 26 without WebGPU gets a non-asyncify build that Vite does not emit, so
+// transformers.js points ONNX Runtime at jsDelivr for its .mjs factory and .wasm
+// binary. Serve both from our own origin instead. Both must be set: without an .mjs
+// path ONNX Runtime falls back to the factory embedded in its bundle, whose
+// multi-threaded build (under cross-origin isolation) spawns its pthread workers
+// from `import.meta.url`, i.e. our whole worker bundle. Each thread would then run
+// the demo's message handler, reload the model, and can crash the worker.
+// Safari < 26 without WebGPU gets a non-asyncify build that is not emitted here, so
 // that case stays on the CDN.
 const onnxWasm = env.backends.onnx?.wasm;
 if (onnxWasm?.wasmPaths?.wasm?.endsWith(".asyncify.wasm")) {
-  onnxWasm.wasmPaths = undefined;
+  onnxWasm.wasmPaths = {
+    mjs: new URL(ortMjsUrl, import.meta.url).href,
+    wasm: new URL(ortWasmUrl, import.meta.url).href,
+  };
 }
 
 // The UIs only react to these model-loading events. Forwarding every `progress`
