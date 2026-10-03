@@ -441,7 +441,7 @@ function App() {
               {status === "load-error" && (
                 <Card accent="border-red-500" label="Model load failed">
                   <div className="flex flex-wrap justify-between items-center gap-3">
-                    <span className="font-semibold">The model could not be loaded</span>
+                    <span role="alert" className="font-semibold">The model could not be loaded</span>
                     <button
                       type="button"
                       onClick={retryLoad}
