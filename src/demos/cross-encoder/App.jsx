@@ -46,8 +46,12 @@ function App() {
     worker.current.addEventListener("message", onMessageReceived);
 
     // Define a cleanup function for when the component is unmounted.
-    return () =>
+    // Terminate the worker so its model is released instead of leaking.
+    return () => {
       worker.current.removeEventListener("message", onMessageReceived);
+      worker.current.terminate();
+      worker.current = null;
+    };
   }, []);
 
   const run = useCallback(() => {

@@ -85,12 +85,22 @@ function App() {
     };
 
     // Attach the callback function as an event listener.
-    worker.current.addEventListener("message", onMessageReceived);
+    const currentWorker = worker.current;
+    currentWorker.addEventListener("message", onMessageReceived);
 
     // Define a cleanup function for when the component is unmounted.
     return () =>
-      worker.current.removeEventListener("message", onMessageReceived);
+      currentWorker.removeEventListener("message", onMessageReceived);
   }, [sections]);
+
+  // Terminate the worker on unmount so its model is released instead of leaking.
+  // Kept separate from the effect above, which re-runs whenever `sections` changes.
+  useEffect(() => {
+    return () => {
+      worker.current?.terminate();
+      worker.current = null;
+    };
+  }, []);
 
   const classify = useCallback(() => {
     setStatus("processing");

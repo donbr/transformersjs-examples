@@ -4,14 +4,8 @@ import Layout from './Layout';
 import HomePage from './HomePage';
 
 // Dynamic imports for each example
-const LlamaDemo = React.lazy(() => import('./demos/llama/App'));
-const PhiDemo = React.lazy(() => import('./demos/phi/App'));
-const JanusDemo = React.lazy(() => import('./demos/janus/App'));
-const FlorenceDemo = React.lazy(() => import('./demos/florence/App'));
 const CrossEncoderDemo = React.lazy(() => import('./demos/cross-encoder/App'));
 const ZeroShotDemo = React.lazy(() => import('./demos/zero-shot/App'));
-const SpeechT5Demo = React.lazy(() => import('./demos/speecht5/App'));
-const TTSDemo = React.lazy(() => import('./demos/tts/App'));
 
 function App() {
   // Define header content
@@ -36,14 +30,8 @@ function App() {
         }>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/llama" element={<LlamaDemo />} />
-            <Route path="/phi" element={<PhiDemo />} />
-            <Route path="/janus" element={<JanusDemo />} />
-            <Route path="/florence" element={<FlorenceDemo />} />
             <Route path="/cross-encoder" element={<CrossEncoderDemo />} />
             <Route path="/zero-shot" element={<ZeroShotDemo />} />
-            <Route path="/speecht5" element={<SpeechT5Demo />} />
-            <Route path="/tts" element={<TTSDemo />} />
           </Routes>
         </React.Suspense>
       </div>

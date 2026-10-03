@@ -3,34 +3,6 @@ import { Link } from 'react-router-dom';
 
 const demoList = [
   {
-    id: 'llama',
-    name: 'Llama 3.2',
-    description: 'Text generation with Llama 3.2 using WebGPU acceleration',
-    category: 'text-generation',
-    requiresWebGPU: true
-  },
-  {
-    id: 'phi',
-    name: 'Phi 3.5',
-    description: 'Text generation with Phi 3.5 using WebGPU acceleration',
-    category: 'text-generation',
-    requiresWebGPU: true
-  },
-  {
-    id: 'janus',
-    name: 'Janus',
-    description: 'Multimodal text generation with image creation capabilities',
-    category: 'multimodal',
-    requiresWebGPU: true
-  },
-  {
-    id: 'florence',
-    name: 'Florence 2',
-    description: 'Vision model for image understanding and captioning',
-    category: 'vision',
-    requiresWebGPU: true
-  },
-  {
     id: 'cross-encoder',
     name: 'Cross Encoder',
     description: 'Text similarity and relevance scoring',
@@ -43,20 +15,6 @@ const demoList = [
     description: 'Classify text without specific training',
     category: 'classification',
     requiresWebGPU: false
-  },
-  {
-    id: 'speecht5',
-    name: 'SpeechT5',
-    description: 'Convert text to speech',
-    category: 'audio',
-    requiresWebGPU: false
-  },
-  {
-    id: 'tts',
-    name: 'Text-to-Speech WebGPU',
-    description: 'Generate speech from text with WebGPU acceleration',
-    category: 'audio',
-    requiresWebGPU: true
   }
 ];
 
@@ -93,7 +51,7 @@ function HomePage() {
         Run machine learning models directly in your browser <a href="https://github.com/donbr/transformers-js-examples/blob/main/README.md" className="text-blue-600 hover:underline">leveraging powerful examples</a> from the Transformers.js community!
       </p>
       
-      {!hasWebGPU && (
+      {!hasWebGPU && demoList.some(demo => demo.requiresWebGPU) && (
         <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
           <p><strong>Note:</strong> WebGPU is not detected in your browser. Examples marked with ⚡ require WebGPU support and may not work properly.</p>
         </div>
