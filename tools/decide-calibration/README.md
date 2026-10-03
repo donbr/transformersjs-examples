@@ -119,7 +119,10 @@ OPEN_JEV=./open-jev-pr.mjs node score.mjs gliner2-decide q4 desc
 
 1. Replace `BANKING`/`CREDIT` in `build_split.py` (or load your own labeled tickets) with three
    disjoint sets: **dev** (write label text and scope notes from its errors), **calibration**
-   (a few hundred tickets; the threshold search needs at least 60 acted-on items), and **test**
+   (a few hundred tickets; the threshold search needs at least 60 acted-on items. Small
+   calibration sets cannot certify tight targets: with 550 tickets here, ≤3% had no certifiable
+   threshold. Plan the calibration size from the target, e.g. 0 errors in 59 acted-on tickets is
+   the minimum for ≤5%), and **test**
    (report numbers only from this).
 2. Write the labels in `src/demos/decide/labels.js` (keep a catch-all `other` label with an
    explicit scope note) and follow the regeneration steps above.

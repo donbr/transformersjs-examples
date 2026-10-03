@@ -38,7 +38,7 @@ out-of-scope ("another team's queue"), and CLINC's `oos` rows are far out-of-sco
 | Test | CLINC test | 450 banking + 150 credit + 150 oos | Reporting results only |
 
 The three splits share no text. Scores were computed in Chrome 154 (Windows) with q4f16 on
-WebGPU (`tools/decide-calibration/provenance.json`): 357 MB download, ~0.8 s first call,
+WebGPU (`tools/decide-calibration/provenance.json`): 357 MB download, 0.8 s first call (model and GPU shader cache already warm; about 4 s cold),
 364 ms p50 / 373 ms p90 per ticket.
 
 ## Shipped results (held-out test)
@@ -125,8 +125,9 @@ These affect correctness; read them before changing labels, models or data.
 
 ### Spike model comparison (≤5% target)
 
-Spike split (calibration on CLINC validation, so these thresholds are not valid guarantees),
-same 750 test tickets. "Routed" is the share of all test tickets acted on.
+Spike split, same 750 test tickets. Rows with scope notes were calibrated on the same CLINC
+validation set the notes were written from, so their thresholds are not valid guarantees; rows
+without notes never used validation for anything else, so theirs are. "Routed" is the share of all test tickets acted on.
 
 | Model | Runtime | Notes | In-scope top-1 | Threshold | Routed | Error when acting | p50 |
 |-------|---------|-------|----------------|-----------|--------|-------------------|-----|
@@ -151,6 +152,8 @@ computed live from the shipped data.
 - **Cost and speed (cited).** On narrow classification and intent tasks, fine-tuned small
   encoders matched or beat zero/few-shot frontier LLMs at roughly 100–400× lower cost per
   request, and answered in milliseconds; the LLMs were better at spotting out-of-scope inputs.
+  /decide itself uses a general-purpose encoder (open-jev) with no task-specific fine-tuning;
+  fine-tuning on a customer's labeled tickets is a further step these studies support.
   Two 2026 preprints, not peer reviewed:
   - [arXiv:2602.06370](https://arxiv.org/abs/2602.06370), Valdes Gonzalez, *Cost-Aware Model
     Selection for Text Classification*. Cost per 1M requests: DistilBERT $5–13 vs few-shot

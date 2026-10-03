@@ -561,7 +561,7 @@ function App() {
                     {!testStats && (
                       <>
                         <dt className="text-gray-500">Held-out test</dt>
-                        <dd className="text-gray-500">not measured for these labels</dd>
+                        <dd className="text-gray-500">not measured for this setup</dd>
                       </>
                     )}
                     {testStats && (

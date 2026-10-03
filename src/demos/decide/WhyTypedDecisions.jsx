@@ -1,6 +1,6 @@
 // "Why typed decisions?" explainer below the /decide tool. Closed by default; numbers marked
 // "measured here" come from the same values as the Policy panel, so they follow the slider and
-// disappear when the labels no longer match the shipped scores. Sources: docs/decide.md.
+// read "not measured for this setup" when the shipped test scores do not apply. Sources: docs/decide.md.
 
 const pct = (x) => (x == null ? "–" : `${(x * 100).toFixed(1)}%`);
 
@@ -44,11 +44,11 @@ function Link({ href, children }) {
 
 /**
  * @param {{ target: number, threshold: number|null, testStats: object|null }} props
- * testStats is null when the held-out test was not measured for the current labels.
+ * testStats is null when the held-out test does not apply: edited labels, or scores recalibrated on this device.
  */
 export default function WhyTypedDecisions({ target, threshold, testStats }) {
   const measured = testStats !== null;
-  const notMeasured = <Stat>not measured for these labels</Stat>;
+  const notMeasured = <Stat>not measured for this setup</Stat>;
 
   return (
     <details className="group mt-8 border-t border-gray-200 pt-6">
@@ -87,7 +87,8 @@ export default function WhyTypedDecisions({ target, threshold, testStats }) {
             Two 2026 preprints (not peer reviewed) found that on narrow classification and intent tasks, fine-tuned
             small encoders matched or beat zero- and few-shot frontier LLMs at roughly 100–400× lower cost per request,
             answering in milliseconds rather than about a second. The LLMs were better at spotting out-of-scope
-            inputs.
+            inputs. This page uses a general-purpose encoder with no fine-tuning on these intents; fine-tuning on a
+            customer&apos;s own tickets is the next step those studies point to.
           </p>
           <p className="text-sm">
             <Link href="https://arxiv.org/abs/2602.06370">arXiv:2602.06370</Link> (cost per request) ·{" "}
@@ -97,8 +98,9 @@ export default function WhyTypedDecisions({ target, threshold, testStats }) {
 
         <Section title="Act only when it is safe" pill="measured">
           <p>
-            The model routes a ticket only when an upper bound on its error rate, certified on held-out calibration
-            tickets, meets your target. Everything else goes to a person.
+            A ticket is routed only when its top label clears a threshold chosen so that, on held-out calibration
+            tickets, the 95% upper bound on the error rate of routed tickets meets your target. Everything else goes
+            to a person.
           </p>
           <p>
             At the ≤{target}% target:{" "}
@@ -127,14 +129,21 @@ export default function WhyTypedDecisions({ target, threshold, testStats }) {
         <div className="md:col-span-2 bg-amber-50 border-l-4 border-amber-400 p-4">
           <Section title="Honest limits" pill="measured">
             <p>
-              The guarantee bounds error over routed tickets, not for each kind of ticket: at ≤{target}%,{" "}
-              {measured ? (
-                <Stat tone="amber">{pct(testStats.leakNear)} of credit-card questions</Stat>
+              The guarantee bounds error over routed tickets, not for each kind of ticket:{" "}
+              {!measured ? (
+                <>
+                  at ≤{target}%, credit-card leak is <Stat tone="amber">not measured for this setup</Stat>.
+                </>
+              ) : threshold === null ? (
+                <>nothing is routed at ≤{target}%, so nothing leaks, but nothing is automated either.</>
               ) : (
-                <Stat tone="amber">not measured for these labels</Stat>
-              )} still get
-              routed to a banking queue. CLINC150 is a clean benchmark, not real tickets. Labels need tuning for each
-              queue, and real traffic drifts, so recalibrate on it.
+                <>
+                  at ≤{target}%, <Stat tone="amber">{pct(testStats.leakNear)} of credit-card questions</Stat> still get
+                  routed to a banking queue.
+                </>
+              )}{" "}
+              CLINC150 is a clean benchmark, not real tickets. Labels need tuning for each queue, and real traffic
+              drifts, so recalibrate on it.
             </p>
           </Section>
         </div>
