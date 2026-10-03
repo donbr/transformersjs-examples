@@ -3,6 +3,7 @@ import { DEFAULT_LABELS } from "./labels.js";
 import { certifyThreshold, decide, ESCAPE_KEY, evaluate } from "./calibration.js";
 import calibrationData from "./data/calibration.json";
 import testData from "./data/test.json";
+import WhyTypedDecisions from "./WhyTypedDecisions.jsx";
 
 const SAMPLES = [
   "Please move $200 from checking to savings",
@@ -560,7 +561,7 @@ function App() {
                     {!testStats && (
                       <>
                         <dt className="text-gray-500">Held-out test</dt>
-                        <dd className="text-gray-500">not measured for these labels</dd>
+                        <dd className="text-gray-500">not measured for this setup</dd>
                       </>
                     )}
                     {testStats && (
@@ -612,6 +613,9 @@ function App() {
               />
             </aside>
           </div>
+
+          {/* A sibling of the tool, not a wrapper: toggling it must not remount the worker. */}
+          <WhyTypedDecisions target={target} threshold={threshold} testStats={stale ? null : testStats} />
         </div>
       </div>
     </div>

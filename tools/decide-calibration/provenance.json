@@ -1,0 +1,18 @@
+{
+ "model": "onnx-community/open-jev-deberta-v3-large-ONNX",
+ "family": "open-jev",
+ "device": "webgpu",
+ "dtype": "q4f16",
+ "downloadSize": 357050727,
+ "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+ "loadMs": 4269,
+ "firstCallMs": 802,
+ "testLatencyMs": {
+  "p50": 364,
+  "p90": 373
+ },
+ "items": {
+  "calibration": 550,
+  "test": 750
+ }
+}
