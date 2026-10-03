@@ -22,22 +22,22 @@ There is no test suite. Verify changes by running the dev server and exercising 
 
 ## Architecture
 
-**App shell** — `src/main.jsx` mounts `BrowserRouter` → `App`. `src/App.jsx` lazy-loads each demo (`React.lazy`) onto its route inside `Layout` (`src/Layout.jsx`). `src/HomePage.jsx` holds a separate hard-coded `demoList` (name, description, category, `requiresWebGPU`); its WebGPU warning only renders when some listed demo has `requiresWebGPU: true`.
+**App shell** — `src/main.jsx` mounts `BrowserRouter` → `App`. `src/App.jsx` lazy-loads each demo (`React.lazy`) onto its route inside `Layout` (`src/Layout.jsx`). `src/HomePage.jsx` holds a separate hard-coded `demoList` (id, name, description, category); add a `categoryNames` entry for any new category. It has no WebGPU detection; a WebGPU-only demo needs its own capability check.
 
 **Demos** — each `src/demos/<id>/` has:
-- `App.jsx` — the UI. It creates the worker with `new Worker(new URL("./worker.js", import.meta.url), { type: "module" })` and **terminates it on unmount** (`worker.current.terminate()` in an effect cleanup), which releases the model. Keep that cleanup when editing; without it every visit leaks a worker and its model.
-- `worker.js` — model loading and inference. A static singleton class (`??=` on `pipeline(...)` / `from_pretrained(...)`) loads the model once per worker, forwards transformers.js `progress_callback` events to the main thread, and posts `{ status: "output" | "complete", ... }` results.
+- `App.jsx` — the UI. One mount-only effect (`[]` deps) creates the worker with `new Worker(new URL("./worker.js", import.meta.url), { type: "module" })`, attaches the message listener, and in its cleanup removes the listener and **terminates the worker**, which releases the model. Keep that cleanup when editing; without it every visit leaks a worker and its model. Keep the listener free of render-time state (read current state inside functional `setState` updaters) so the effect never re-runs.
+- `worker.js` — model loading and inference. A static singleton class (`??=` on `pipeline(...)` / `from_pretrained(...)`) loads the model once per worker; a `.catch` resets the cached promise so a failed load can be retried. Each worker imports `src/utils/workerRuntime.js`, which forwards only the `initiate` / `done` / `ready` progress events (`forwardProgress`) and posts `{ status: "error", error }` (`postError`) from the message handler's `try/catch`. Results are `{ status: "output" | "complete", ... }`; the UI shows `error` and returns to idle.
 - `main.jsx` / `index.css` — leftovers from the upstream standalone versions; not imported by the unified app.
 
 **Adding a demo** touches three places: a new `src/demos/<id>/` folder, a lazy import + `<Route>` in `src/App.jsx`, and an entry in `demoList` in `src/HomePage.jsx`. Keep the README model table in sync.
 
 ## Build / runtime constraints
 
-- `vite.config.js`: workers build as ES modules (`worker.format: 'es'`), target `es2022`, `@huggingface/transformers` excluded from dep pre-bundling and split into its own chunk. Don't change these without checking that each demo's worker chunk is still emitted.
+- `vite.config.js`: workers build as ES modules (`worker.format: 'es'`), target `es2022`, `@huggingface/transformers` excluded from dep pre-bundling. The library is only imported from workers, so each worker bundle carries its own copy (~520 KB); a `manualChunks` entry for it produces an empty chunk. Don't change these without checking that each demo's worker chunk is still emitted.
 - `vercel.json` provides the SPA rewrite to `index.html` and cross-origin isolation headers (COOP `same-origin`, COEP `require-corp`). Isolation enables multi-threaded WASM; without it demos still work, single-threaded. Under `require-corp`, any third-party asset (fonts, images, scripts, iframes) without CORP/CORS headers fails to load — self-host such assets. The Vite dev server does not set these headers.
-- At runtime transformers.js loads the ONNX Runtime wasm/mjs from jsDelivr (`cdn.jsdelivr.net/npm/onnxruntime-web@<version>/dist/ort-wasm-simd-threaded.asyncify.{mjs,wasm}` on 4.3.0); the repo does not override `env.backends.onnx.wasm.wasmPaths`. Any CSP or host change must allow that origin plus `huggingface.co` and `us.aws.cdn.hf.co` (model files), or self-host the runtime. Recheck the URL after any transformers.js version change.
+- ONNX Runtime is self-hosted. transformers.js imports `onnxruntime-web/webgpu`, whose bundle embeds the asyncify factory and makes Vite emit `assets/ort-wasm-simd-threaded.asyncify-*.wasm` (~27 MB). transformers.js would otherwise point `env.backends.onnx.wasm.wasmPaths` at jsDelivr; `src/utils/workerRuntime.js` clears it so that bundled same-origin copy is used. Exception: Safari < 26 without WebGPU, where transformers.js picks the non-asyncify build, still loads from `cdn.jsdelivr.net`. Any CSP or host change must allow `huggingface.co` and `us.aws.cdn.hf.co` (model files) and, for that Safari case, jsDelivr. After a transformers.js upgrade, recheck that the emitted wasm name still ends in `.asyncify.wasm` and that the runtime requests it from the app's own origin.
 - Layout height model: `body` is `overflow: hidden`; `.layout-container` is an `auto 1fr auto` grid and `.layout-content` scrolls. Demos fill that row via `.demo-container` / `h-full`. Avoid `transform`, `filter`, `contain`, `will-change` etc. on those wrappers — they would trap `position: fixed` overlays.
-- `index.html` references `/logo.png`, but there is no `public/` directory in the repo.
+- There is no `public/` directory. `index.html` uses an empty `data:` favicon so the browser does not request a missing file.
 
 ## Mobile layout
 

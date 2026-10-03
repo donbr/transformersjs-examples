@@ -11,6 +11,7 @@ const PLACEHOLDER_TEXTS = [
 
 function App() {
   const [status, setStatus] = useState("idle");
+  const [error, setError] = useState(null);
 
   const [query, setQuery] = useState(`Who wrote 'To Kill a Mockingbird'?`);
   const [documents, setDocuments] = useState(PLACEHOLDER_TEXTS.join("\n"));
@@ -39,6 +40,9 @@ function App() {
       } else if (status === "complete") {
         setResults(e.data.output);
         setStatus("idle");
+      } else if (status === "error") {
+        setError(e.data.error);
+        setStatus("idle");
       }
     };
 
@@ -55,6 +59,7 @@ function App() {
   }, []);
 
   const run = useCallback(() => {
+    setError(null);
     setStatus("processing");
     worker.current.postMessage({
       query,
@@ -138,6 +143,11 @@ function App() {
                       : "Processing"}
                 </button>
               </div>
+              {error && (
+                <p className="text-center text-sm text-red-600">
+                  Reranking failed: {error}
+                </p>
+              )}
             </div>
             
             {/* Results section */}

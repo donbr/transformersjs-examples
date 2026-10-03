@@ -13,9 +13,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Split large libraries into separate chunks
+          // Split large libraries into separate chunks. @huggingface/transformers is
+          // only imported from workers, so each worker bundle carries its own copy.
           react: ['react', 'react-dom', 'react-router-dom'],
-          transformers: ['@huggingface/transformers'],
         }
       }
     }
