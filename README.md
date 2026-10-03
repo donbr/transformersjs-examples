@@ -2,6 +2,8 @@
 
 This repository contains a collection of example applications demonstrating the capabilities of [TransformersJS](https://github.com/huggingface/transformers.js), allowing you to run machine learning models directly in the browser. This project provides a unified application that combines multiple models into a single cohesive experience.
 
+**Live site:** https://transformersjs-examples.vercel.app
+
 > **Important**: This project builds upon the original examples from [huggingface/transformers.js-examples](https://github.com/huggingface/transformers.js-examples). Please star and watch the original repository for updates and new examples.
 
 ## 🌟 Features
