@@ -58,10 +58,12 @@ function App() {
     // Create a callback function for messages from the worker thread.
     const onMessageReceived = (e) => {
       const status = e.data.status;
+      // A load can still report progress after the request already failed;
+      // don't let it leave idle.
       if (status === "initiate") {
-        setStatus("loading");
+        setStatus((s) => (s === "idle" ? s : "loading"));
       } else if (status === "ready") {
-        setStatus("ready");
+        setStatus((s) => (s === "idle" ? s : "ready"));
       } else if (status === "output") {
         const { sequence, labels, scores } = e.data.output;
 
@@ -89,13 +91,28 @@ function App() {
       }
     };
 
+    // The worker itself failed (its script did not load, or it threw outside the
+    // message handler's try/catch). Stop it so no late message can change state.
+    const onWorkerError = (e) => {
+      e.preventDefault();
+      worker.current.terminate();
+      setError(
+        "The model worker stopped unexpectedly. Reload the page to try again.",
+      );
+      setStatus("failed");
+    };
+
     // Attach the callback function as an event listener.
     worker.current.addEventListener("message", onMessageReceived);
+    worker.current.addEventListener("error", onWorkerError);
+    worker.current.addEventListener("messageerror", onWorkerError);
 
     // Define a cleanup function for when the component is unmounted.
     // Terminate the worker so its model is released instead of leaking.
     return () => {
       worker.current.removeEventListener("message", onMessageReceived);
+      worker.current.removeEventListener("error", onWorkerError);
+      worker.current.removeEventListener("messageerror", onWorkerError);
       worker.current.terminate();
       worker.current = null;
     };
@@ -155,7 +172,9 @@ function App() {
                     ? "Categorize"
                     : status === "loading"
                       ? "Model loading..."
-                      : "Processing"}
+                      : status === "failed"
+                        ? "Unavailable"
+                        : "Processing"}
                 </button>
               </div>
 
