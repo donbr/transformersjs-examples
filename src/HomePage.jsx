@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 
 const demoList = [
   {
+    id: 'decide',
+    name: 'Decide',
+    description: 'Auto-route a support ticket only when a calibrated confidence threshold meets your error target; escalate the rest',
+    category: 'decisions'
+  },
+  {
     id: 'cross-encoder',
     name: 'Cross Encoder',
     description: 'Text similarity and relevance scoring',
@@ -27,6 +33,7 @@ const groupedDemos = demoList.reduce((acc, demo) => {
 
 // Map category to friendly names
 const categoryNames = {
+  'decisions': 'Typed Decisions',
   'classification': 'Text Classification'
 };
 

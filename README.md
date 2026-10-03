@@ -17,6 +17,7 @@ The application includes examples for various machine learning tasks:
 
 | Model | Description | Model ID | Backend |
 |-------|-------------|----------|---------|
+| Decide | Auto-route or escalate a support ticket using a calibrated confidence threshold | onnx-community/open-jev-deberta-v3-large-ONNX (via `open-jev`) | Preferred (WASM fallback) |
 | Cross Encoder | Text similarity and relevance scoring | mixedbread-ai/mxbai-rerank-xsmall-v1 | WASM |
 | Zero-Shot Classification | Classify text without specific training | MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33 | WASM |
 
