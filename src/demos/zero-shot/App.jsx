@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { primaryButton as primary, secondaryButton as secondary } from "../../ui/buttons.js";
 
 // Sample sets: items to sort and the categories to sort them into.
 const SAMPLES = [
@@ -47,10 +48,8 @@ const shuffle = (list) => [...list].sort(() => Math.random() - 0.5);
 const lines = (text) => text.split("\n").map((l) => l.trim()).filter(Boolean);
 
 const card = "bg-white rounded-lg shadow-md border-t-4 border-green-500 p-5 sm:p-6 flex flex-col gap-4 min-w-0";
-const primaryButton =
-  "px-6 py-2 rounded-md font-medium text-white bg-blue-600 hover:bg-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed";
-const secondaryButton =
-  "px-4 py-2 rounded-md font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50";
+const primaryButton = `${primary} px-6 py-2`;
+const secondaryButton = `${secondary} px-4 py-2`;
 
 function App() {
   const [sample, setSample] = useState(SAMPLES[0].name);

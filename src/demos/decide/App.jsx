@@ -4,6 +4,7 @@ import { certifyThreshold, decide, ESCAPE_KEY, evaluate } from "./calibration.js
 import calibrationData from "./data/calibration.json";
 import testData from "./data/test.json";
 import WhyTypedDecisions from "./WhyTypedDecisions.jsx";
+import { primaryButton, secondaryButton } from "../../ui/buttons.js";
 
 const SAMPLES = [
   "Please move $200 from checking to savings",
@@ -57,7 +58,7 @@ function LoadCard({ load }) {
         ))}
       </ol>
       <div className="flex justify-between items-baseline gap-3">
-        <span className="text-lg font-semibold">
+        <span className="text-lg font-semibold min-w-0 flex-1">
           {warming
             ? "Warming up"
             : load.total == null
@@ -67,7 +68,7 @@ function LoadCard({ load }) {
                 : "Downloading model"}
         </span>
         {!warming && load.total != null && (
-          <span className="font-mono text-sm text-gray-600">
+          <span className="font-mono text-sm text-gray-600 whitespace-nowrap">
             {MB(load.loaded)} / {MB(load.total)} MB
           </span>
         )}
@@ -186,11 +187,11 @@ function LabelsCard({ labels, editing, draft, setDraft, onEdit, onSave, onCancel
         {!editing && (
           <div className="flex gap-2">
             {edited && (
-              <button type="button" onClick={onReset} disabled={disabled} className="text-sm px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+              <button type="button" onClick={onReset} disabled={disabled} className={`${secondaryButton} text-sm px-3 py-1.5`}>
                 Reset
               </button>
             )}
-            <button type="button" onClick={onEdit} disabled={disabled} className="text-sm px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+            <button type="button" onClick={onEdit} disabled={disabled} className={`${secondaryButton} text-sm px-3 py-1.5`}>
               Edit
             </button>
           </div>
@@ -213,7 +214,7 @@ function LabelsCard({ labels, editing, draft, setDraft, onEdit, onSave, onCancel
                   value={l.text}
                   disabled={l.key === ESCAPE_KEY}
                   onChange={(e) => setDraft(draft.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
-                  className="font-semibold border border-gray-300 rounded px-2 py-1 disabled:bg-gray-50"
+                  className="font-semibold border border-gray-300 rounded-md px-2 py-1 disabled:bg-gray-50"
                 />
                 <label className="sr-only" htmlFor={`note-${l.key}`}>Scope note for label {i + 1}</label>
                 <input
@@ -221,15 +222,15 @@ function LabelsCard({ labels, editing, draft, setDraft, onEdit, onSave, onCancel
                   value={l.description}
                   placeholder="Scope note (optional)"
                   onChange={(e) => setDraft(draft.map((x, j) => (j === i ? { ...x, description: e.target.value } : x)))}
-                  className="text-sm border border-gray-200 rounded px-2 py-1 text-gray-700"
+                  className="text-sm border border-gray-200 rounded-md px-2 py-1 text-gray-700"
                 />
               </li>
             ))}
           </ul>
           {invalid && <p className="text-sm text-red-600">Every label needs a unique, non-empty name.</p>}
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={onCancel} className="text-sm px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={invalid} className="text-sm px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400">Save labels</button>
+            <button type="button" onClick={onCancel} className={`${secondaryButton} text-sm px-3 py-1.5`}>Cancel</button>
+            <button type="submit" disabled={invalid} className={`${primaryButton} text-sm px-3 py-1.5`}>Save labels</button>
           </div>
         </form>
       ) : (
@@ -413,211 +414,208 @@ function App() {
   const showResult = result && result.labelsKey === currentKey;
 
   return (
-    <div className="demo-container">
-      <div className="demo-scroll-area p-2 md:p-4">
-        <div className="max-w-6xl w-full mx-auto flex flex-col gap-5">
-          <header className="flex flex-wrap justify-between items-end gap-3">
-            <div className="max-w-2xl">
-              <h1 className="text-3xl font-bold mb-1">Decide</h1>
-              <p className="text-gray-600">
-                Paste a support ticket. It is routed automatically only when the model is confident enough to meet your
-                error target. Everything else goes to a person.
-              </p>
-            </div>
-            <span className="inline-flex items-center gap-2 px-2.5 py-1 border border-gray-200 rounded-md bg-gray-50 text-sm">
-              <span className="font-mono text-gray-600">
-                open-jev · DeBERTa-v3-large{runtime ? ` · ${runtime.dtype}` : ""}
-              </span>
-              {runtime && (
-                <span className="text-xs font-bold uppercase tracking-wider px-1.5 rounded bg-blue-100 text-blue-800">
-                  {runtime.device === "webgpu" ? "WebGPU" : "WASM"}
-                </span>
-              )}
-            </span>
-          </header>
-
-          <div className="flex flex-col lg:flex-row gap-5 items-start">
-            <div className="flex flex-col gap-5 w-full lg:flex-[3] min-w-0">
-              {status === "loading" && <LoadCard load={load} />}
-              {status === "load-error" && (
-                <Card accent="border-red-500" label="Model load failed">
-                  <div className="flex flex-wrap justify-between items-center gap-3">
-                    <span role="alert" className="font-semibold">The model could not be loaded</span>
-                    <button
-                      type="button"
-                      onClick={retryLoad}
-                      className="text-sm font-medium px-4 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      Try again
-                    </button>
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    This is usually a network problem. Files that finished downloading are cached, so a retry only
-                    fetches the rest.
-                  </p>
-                </Card>
-              )}
-
-              <Card accent="border-transparent" label="Ticket">
-                <label htmlFor="ticket" className="font-semibold">Support ticket</label>
-                <textarea
-                  id="ticket"
-                  rows={3}
-                  value={ticket}
-                  onChange={(e) => setTicket(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      runDecide();
-                    }
-                  }}
-                  className="w-full p-3 border border-gray-300 rounded-md resize-y"
-                />
-                <div className="flex flex-wrap gap-2" aria-label="Sample tickets">
-                  {SAMPLES.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setTicket(s)}
-                      className="text-xs px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex justify-between items-center gap-3">
-                  <span className="text-sm text-gray-500">
-                    {status === "failed"
-                      ? "The model is unavailable."
-                      : status === "load-error"
-                        ? "Decide unlocks once the model loads"
-                      : ready
-                        ? "Enter to decide · Shift+Enter for a new line"
-                        : "Decide unlocks when the model is ready"}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={runDecide}
-                    disabled={!canDecide}
-                    className="font-medium px-6 py-2.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
-                  >
-                    {status === "deciding" ? "Deciding…" : status === "failed" ? "Unavailable" : "Decide"}
-                  </button>
-                </div>
-                {error && <p className="text-sm text-red-600">Something went wrong: {error}</p>}
-              </Card>
-
-              {stale && (
-                <section role="status" className="flex gap-3 items-start bg-amber-50 border border-amber-200 text-amber-900 px-5 py-4 rounded-lg">
-                  <span>
-                    <strong>Labels changed. The threshold is out of date.</strong> Every ticket escalates until you
-                    recalibrate, because the previous threshold was certified for different labels.
-                  </span>
-                </section>
-              )}
-
-              {showResult && <Verdict result={result} labels={labels} threshold={threshold} target={target} stale={stale} />}
-            </div>
-
-            <aside className="flex flex-col gap-5 w-full lg:flex-[2] min-w-0">
-              <Card accent="border-purple-500" label="Policy">
-                <h2 className="text-lg font-semibold">Policy</h2>
-                <label htmlFor="target" className="flex justify-between text-gray-700">
-                  <span>Error target for auto-routed tickets</span>
-                  <strong className="text-gray-900">≤ {target}%</strong>
-                </label>
-                <input
-                  id="target"
-                  type="range"
-                  min={1}
-                  max={15}
-                  value={target}
-                  onChange={(e) => setTarget(Number(e.target.value))}
-                  className="w-full accent-blue-600"
-                />
-                {stale && <p className="text-sm text-amber-800">No certified threshold for the edited labels.</p>}
-                {(stale || runtimeMismatch) && (
-                  <div className="flex flex-col gap-2">
-                    <button
-                      type="button"
-                      onClick={recalibrate}
-                      disabled={!ready || !!calibrating}
-                      className="font-medium px-4 py-2.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
-                    >
-                      {calibrating ? `Recalibrating… ${calibrating.done} / ${calibrating.total}` : "Recalibrate"}
-                    </button>
-                    <span className="text-xs text-gray-500">
-                      Re-scores the {calibrationData.items.length} calibration tickets with the current labels on
-                      this device: about 3–4 minutes on integrated graphics. Keep this tab open.
-                    </span>
-                  </div>
-                )}
-                {!stale && (
-                  <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
-                    <dt className="text-gray-500">Certified threshold</dt>
-                    <dd className="font-mono">{threshold === null ? "none (escalate all)" : threshold.toFixed(2)}</dd>
-                    <dt className="text-gray-500">Calibration: in-scope auto-routed</dt>
-                    <dd className="font-mono">{pct(calibration.stats.autoRateInScope)}</dd>
-                    {!testStats && (
-                      <>
-                        <dt className="text-gray-500">Held-out test</dt>
-                        <dd className="text-gray-500">not measured for this setup</dd>
-                      </>
-                    )}
-                    {testStats && (
-                      <>
-                        <dt className="text-gray-500">Held-out test: in-scope auto-routed</dt>
-                        <dd className="font-mono">{pct(testStats.autoRateInScope)}</dd>
-                        <dt className="text-gray-500">Held-out test: error when acting</dt>
-                        <dd className="font-mono">{pct(testStats.errorAmongActed)}</dd>
-                        <dt className="text-gray-500">Held-out test: out-of-scope routed</dt>
-                        <dd className="font-mono">
-                          {pct(testStats.leakNear)} near · {pct(testStats.leakFar)} far
-                        </dd>
-                      </>
-                    )}
-                  </dl>
-                )}
-                {runtimeMismatch && (
-                  <p className="text-xs text-amber-800">
-                    The shipped scores were calibrated with {calibrationData.runtime.dtype} on{" "}
-                    {calibrationData.runtime.device === "webgpu" ? "WebGPU" : "WASM"}; this device runs {runtime.dtype}{" "}
-                    on {runtime.device === "webgpu" ? "WebGPU" : "WASM"}. Recalibrate for a strict guarantee here.
-                  </p>
-                )}
-                <span className="text-xs text-gray-500">
-                  The threshold is the loosest one whose 95% upper bound on error stays within the target on{" "}
-                  {calibrationData.items.length} calibration tickets. Moving the slider re-runs that search over cached
-                  scores without calling the model. Data: CLINC150 banking intents (CC BY 3.0), with credit-card and
-                  off-topic messages as out-of-scope traffic.
-                </span>
-              </Card>
-
-              <LabelsCard
-                labels={labels}
-                editing={editing}
-                draft={draft}
-                setDraft={setDraft}
-                edited={currentKey !== DEFAULT_KEY}
-                disabled={!!calibrating}
-                onEdit={() => {
-                  setDraft(labels);
-                  setEditing(true);
-                }}
-                onSave={saveLabels}
-                onCancel={() => setEditing(false)}
-                onReset={() => {
-                  setLabels(DEFAULT_LABELS);
-                  setCustom(null);
-                }}
-              />
-            </aside>
-          </div>
-
-          {/* A sibling of the tool, not a wrapper: toggling it must not remount the worker. */}
-          <WhyTypedDecisions target={target} threshold={threshold} testStats={stale ? null : testStats} />
+    // The demo wrapper in src/App.jsx provides the max-w-6xl column and the page scroll.
+    <div className="flex flex-col gap-5 pb-10">
+      <header className="flex flex-wrap justify-between items-end gap-3">
+        <div className="max-w-2xl">
+          <h1 className="text-3xl font-bold mb-1">Decide</h1>
+          <p className="text-gray-600">
+            Paste a support ticket. It is routed automatically only when the model is confident enough to meet your
+            error target. Everything else goes to a person.
+          </p>
         </div>
+        <span className="inline-flex items-center gap-2 px-2.5 py-1 border border-gray-200 rounded-md bg-gray-50 text-sm">
+          <span className="font-mono text-gray-600">
+            open-jev · DeBERTa-v3-large{runtime ? ` · ${runtime.dtype}` : ""}
+          </span>
+          {runtime && (
+            <span className="text-xs font-bold uppercase tracking-wider px-1.5 rounded bg-blue-100 text-blue-800">
+              {runtime.device === "webgpu" ? "WebGPU" : "WASM"}
+            </span>
+          )}
+        </span>
+      </header>
+
+      <div className="flex flex-col lg:flex-row gap-5 items-start">
+        <div className="flex flex-col gap-5 w-full lg:flex-[3] min-w-0">
+          {status === "loading" && <LoadCard load={load} />}
+          {status === "load-error" && (
+            <Card accent="border-red-500" label="Model load failed">
+              <div className="flex flex-wrap justify-between items-center gap-3">
+                <span role="alert" className="font-semibold">The model could not be loaded</span>
+                <button
+                  type="button"
+                  onClick={retryLoad}
+                  className={`${primaryButton} text-sm px-4 py-1.5`}
+                >
+                  Try again
+                </button>
+              </div>
+              <p className="text-sm text-gray-600">
+                This is usually a network problem. Files that finished downloading are cached, so a retry only
+                fetches the rest.
+              </p>
+            </Card>
+          )}
+
+          <Card accent="border-transparent" label="Ticket">
+            <label htmlFor="ticket" className="font-semibold">Support ticket</label>
+            <textarea
+              id="ticket"
+              rows={3}
+              value={ticket}
+              onChange={(e) => setTicket(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  runDecide();
+                }
+              }}
+              className="w-full p-3 border border-gray-300 rounded-md resize-y"
+            />
+            <div className="flex flex-wrap gap-2" aria-label="Sample tickets">
+              {SAMPLES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setTicket(s)}
+                  className="text-xs px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-sm text-gray-500">
+                {status === "failed"
+                  ? "The model is unavailable."
+                  : status === "load-error"
+                    ? "Decide unlocks once the model loads"
+                  : ready
+                    ? "Enter to decide · Shift+Enter for a new line"
+                    : "Decide unlocks when the model is ready"}
+              </span>
+              <button
+                type="button"
+                onClick={runDecide}
+                disabled={!canDecide}
+                className={`${primaryButton} px-6 py-2.5`}
+              >
+                {status === "deciding" ? "Deciding…" : status === "failed" ? "Unavailable" : "Decide"}
+              </button>
+            </div>
+            {error && <p className="text-sm text-red-600">Something went wrong: {error}</p>}
+          </Card>
+
+          {stale && (
+            <section role="status" className="flex gap-3 items-start bg-amber-50 border border-amber-200 text-amber-900 px-5 py-4 rounded-lg">
+              <span>
+                <strong>Labels changed. The threshold is out of date.</strong> Every ticket escalates until you
+                recalibrate, because the previous threshold was certified for different labels.
+              </span>
+            </section>
+          )}
+
+          {showResult && <Verdict result={result} labels={labels} threshold={threshold} target={target} stale={stale} />}
+        </div>
+
+        <aside className="flex flex-col gap-5 w-full lg:flex-[2] min-w-0">
+          <Card accent="border-purple-500" label="Policy">
+            <h2 className="text-lg font-semibold">Policy</h2>
+            <label htmlFor="target" className="flex justify-between text-gray-700">
+              <span>Error target for auto-routed tickets</span>
+              <strong className="text-gray-900">≤ {target}%</strong>
+            </label>
+            <input
+              id="target"
+              type="range"
+              min={1}
+              max={15}
+              value={target}
+              onChange={(e) => setTarget(Number(e.target.value))}
+              className="w-full accent-blue-600"
+            />
+            {stale && <p className="text-sm text-amber-800">No certified threshold for the edited labels.</p>}
+            {(stale || runtimeMismatch) && (
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={recalibrate}
+                  disabled={!ready || !!calibrating}
+                  className={`${primaryButton} px-4 py-2.5`}
+                >
+                  {calibrating ? `Recalibrating… ${calibrating.done} / ${calibrating.total}` : "Recalibrate"}
+                </button>
+                <span className="text-xs text-gray-500">
+                  Re-scores the {calibrationData.items.length} calibration tickets with the current labels on
+                  this device: about 3–4 minutes on integrated graphics. Keep this tab open.
+                </span>
+              </div>
+            )}
+            {!stale && (
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+                <dt className="text-gray-500">Certified threshold</dt>
+                <dd className="font-mono">{threshold === null ? "none (escalate all)" : threshold.toFixed(2)}</dd>
+                <dt className="text-gray-500">Calibration: in-scope auto-routed</dt>
+                <dd className="font-mono">{pct(calibration.stats.autoRateInScope)}</dd>
+                {!testStats && (
+                  <>
+                    <dt className="text-gray-500">Held-out test</dt>
+                    <dd className="text-gray-500">not measured for this setup</dd>
+                  </>
+                )}
+                {testStats && (
+                  <>
+                    <dt className="text-gray-500">Held-out test: in-scope auto-routed</dt>
+                    <dd className="font-mono">{pct(testStats.autoRateInScope)}</dd>
+                    <dt className="text-gray-500">Held-out test: error when acting</dt>
+                    <dd className="font-mono">{pct(testStats.errorAmongActed)}</dd>
+                    <dt className="text-gray-500">Held-out test: out-of-scope routed</dt>
+                    <dd className="font-mono">
+                      {pct(testStats.leakNear)} near · {pct(testStats.leakFar)} far
+                    </dd>
+                  </>
+                )}
+              </dl>
+            )}
+            {runtimeMismatch && (
+              <p className="text-xs text-amber-800">
+                The shipped scores were calibrated with {calibrationData.runtime.dtype} on{" "}
+                {calibrationData.runtime.device === "webgpu" ? "WebGPU" : "WASM"}; this device runs {runtime.dtype}{" "}
+                on {runtime.device === "webgpu" ? "WebGPU" : "WASM"}. Recalibrate for a strict guarantee here.
+              </p>
+            )}
+            <span className="text-xs text-gray-500">
+              The threshold is the loosest one whose 95% upper bound on error stays within the target on{" "}
+              {calibrationData.items.length} calibration tickets. Moving the slider re-runs that search over cached
+              scores without calling the model. Data: CLINC150 banking intents (CC BY 3.0), with credit-card and
+              off-topic messages as out-of-scope traffic.
+            </span>
+          </Card>
+
+          <LabelsCard
+            labels={labels}
+            editing={editing}
+            draft={draft}
+            setDraft={setDraft}
+            edited={currentKey !== DEFAULT_KEY}
+            disabled={!!calibrating}
+            onEdit={() => {
+              setDraft(labels);
+              setEditing(true);
+            }}
+            onSave={saveLabels}
+            onCancel={() => setEditing(false)}
+            onReset={() => {
+              setLabels(DEFAULT_LABELS);
+              setCustom(null);
+            }}
+          />
+        </aside>
       </div>
+
+      {/* A sibling of the tool, not a wrapper: toggling it must not remount the worker. */}
+      <WhyTypedDecisions target={target} threshold={threshold} testStats={stale ? null : testStats} />
     </div>
   );
 }

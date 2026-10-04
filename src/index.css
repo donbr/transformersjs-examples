@@ -81,26 +81,6 @@ body {
   height: var(--footer-height);
 }
 
-/* Demo component styles */
-.demo-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-}
-
-.demo-scroll-area {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.demo-footer {
-  margin-top: auto;
-}
-
 /* Ensure interactive elements have adequate touch targets on mobile */
 @media (max-width: 768px) {
   button, 

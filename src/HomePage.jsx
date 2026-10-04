@@ -92,7 +92,8 @@ function DecideFlagshipCard({ demo }) {
         <span className="text-sm font-semibold text-gray-600">Held-out test</span>
         <span className="text-4xl font-bold text-blue-600 leading-tight">{pct(HEADLINE.routedInScope, 0)}</span>
         <span className="text-gray-700">
-          of in-scope tickets auto-routed, with {pct(HEADLINE.errorWhenActing, 1)} error when acting
+          {/* U+2011 non-breaking hyphen: keeps "auto-routed" on one line at any panel width. */}
+          of in-scope tickets auto{'\u2011'}routed, with {pct(HEADLINE.errorWhenActing, 1)} error when acting
         </span>
         <span className="text-sm text-gray-500">
           CLINC150 banking · ≤{pct(HEADLINE.target, 0)} target · threshold {HEADLINE.threshold.toFixed(2)}

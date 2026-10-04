@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { primaryButton } from "../../ui/buttons.js";
 
 // Sample sets: a question and candidate passages, as a retriever might return them.
 const SAMPLES = [
@@ -202,7 +203,7 @@ function App() {
               type="button"
               onClick={run}
               disabled={!canRank}
-              className="px-6 py-2 rounded-md font-medium text-white bg-blue-600 hover:bg-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
+              className={`${primaryButton} px-6 py-2`}
             >
               {buttonLabel}
             </button>

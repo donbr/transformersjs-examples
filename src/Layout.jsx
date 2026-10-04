@@ -1,7 +1,15 @@
 import React, { useLayoutEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export default function Layout({ header, children, footer }) {
   const contentRef = useRef(null);
+  const { pathname } = useLocation();
+
+  // .layout-content is the page scroller and stays mounted across routes, so start each
+  // page at the top instead of inheriting the previous page's scroll offset.
+  useLayoutEffect(() => {
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+  }, [pathname]);
 
   // Width of .layout-content's scrollbar (0 for overlay scrollbars). The header pads by it so
   // centred content lines up under the header's content. Measured before paint so the header
