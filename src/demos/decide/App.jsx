@@ -298,8 +298,8 @@ function App() {
           setStatus("ready");
           break;
         case "decision":
-          // Ignore answers to superseded requests; tag the result with the labels it was
-          // scored under, so showResult hides it once the labels differ.
+          // Ignore answers to superseded requests; tag the result with the labels and ticket text
+          // it was scored under, so showResult hides it once either one changes.
           if (msg.id === requestId.current) {
             setResult({ probs: msg.probs, ms: msg.ms, labelsKey: pendingLabelsKey.current, text: pendingText.current });
             setStatus("ready");
