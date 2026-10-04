@@ -3,9 +3,8 @@
 //
 // HEADLINE is asserted against the shipped data by tools/decide-calibration/eval-shipped.mjs,
 // so a re-score that changes it fails that check until this file is updated.
-// RUNTIME is measured; its source is docs/facts.md rows 19–21 (download sizes, first load,
-// per-ticket time). Update those rows with it when the model, dtype or device selection
-// changes.
+// RUNTIME is measured; its sources are the download-size, first-load and per-ticket rows in
+// docs/facts.md. Update those rows with it when the model, dtype or device selection changes.
 export const HEADLINE = {
   target: 0.05,
   threshold: 0.45,
