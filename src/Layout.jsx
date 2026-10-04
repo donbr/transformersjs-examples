@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import RouteErrorBoundary from './RouteErrorBoundary';
 
 export default function Layout({ header, children, footer }) {
   const contentRef = useRef(null);
@@ -32,7 +33,10 @@ export default function Layout({ header, children, footer }) {
   return (
     <div className="layout-container">
       {header && <header className="layout-header">{header}</header>}
-      <main ref={contentRef} className="layout-content">{children}</main>
+      <main ref={contentRef} className="layout-content">
+        {/* Keyed on the path: a failed page shows its error until you navigate elsewhere. */}
+        <RouteErrorBoundary key={pathname}>{children}</RouteErrorBoundary>
+      </main>
       {footer && <footer className="layout-footer">{footer}</footer>}
     </div>
   );
