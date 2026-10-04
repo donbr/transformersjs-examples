@@ -51,125 +51,114 @@ export default function WhyTypedDecisions({ target, threshold, testStats }) {
   const notMeasured = <Stat>not measured for this setup</Stat>;
 
   return (
-    <details className="group mt-8 border-t border-gray-200 pt-6">
-      <summary className="min-h-[44px] cursor-pointer list-none rounded-md py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
-        <span className="flex items-center gap-2 text-xl font-semibold text-gray-800">
-          Why typed decisions?
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            className="h-5 w-5 text-gray-500 transition-transform motion-reduce:transition-none group-open:rotate-180"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </span>
-        <span className="block text-sm text-gray-500">
-          How this compares to asking a chat model, and where it falls short
-        </span>
-      </summary>
+    // The title is a real heading outside <summary>, so screen readers list and navigate it
+    // however they treat a disclosure; the summary is the toggle.
+    <section aria-labelledby="why-typed-decisions" className="mt-8 border-t border-gray-200 pt-6">
+      <h2 id="why-typed-decisions" className="text-xl font-semibold text-gray-800">Why typed decisions?</h2>
+      <details className="group">
+        <summary className="min-h-[44px] cursor-pointer list-none rounded-md py-2 inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
+          <span>How this compares to asking a chat model, and where it falls short</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-gray-500 transition-transform motion-reduce:transition-none group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+        </summary>
 
-      <div className="mt-3 bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500 grid md:grid-cols-2 gap-6">
-        <Section title="The problem">
-          <p>
-            Much enterprise AI work is high-volume routing and classification (support tickets, claims, alerts,
-            documents), not open-ended chat. Each item needs one of a fixed set of answers, fast, cheaply, and with a
-            known error rate.
-          </p>
-        </Section>
-
-        <Section title="Small models, at a fraction of the cost" pill="cited">
-          <p>
-            Two 2026 preprints (not peer reviewed) found that on narrow classification and intent tasks, fine-tuned
-            small encoders matched or beat zero- and few-shot frontier LLMs at roughly 100–400× lower cost per request,
-            answering in milliseconds rather than about a second. The LLMs were better at spotting out-of-scope
-            inputs. This page uses a general-purpose encoder with no fine-tuning on these intents; fine-tuning on a
-            customer&apos;s own tickets is the next step those studies point to.
-          </p>
-          <p className="text-sm">
-            <Link href="https://arxiv.org/abs/2602.06370">arXiv:2602.06370</Link> (cost per request) ·{" "}
-            <Link href="https://arxiv.org/abs/2608.20371">arXiv:2608.20371</Link> (intent detection, latency)
-          </p>
-        </Section>
-
-        <Section title="Act only when it is safe" pill="measured">
-          <p>
-            A ticket is routed only when its top label clears a threshold chosen so that, on held-out calibration
-            tickets, the 95% upper bound on the error rate of routed tickets meets your target. Everything else goes
-            to a person.
-          </p>
-          <p>
-            At the ≤{target}% target:{" "}
-            {!measured ? (
-              notMeasured
-            ) : threshold === null ? (
-              <>
-                no threshold qualifies, so <Stat>every ticket escalates</Stat>.
-              </>
-            ) : (
-              <>
-                <Stat>{pct(testStats.autoRateInScope)} auto-routed</Stat> with{" "}
-                <Stat>{pct(testStats.errorAmongActed)} error when acting</Stat> on held-out test tickets.
-              </>
-            )}
-          </p>
-        </Section>
-
-        <Section title="Private by construction">
-          <p>
-            The model runs in this browser tab. It is downloaded once from the Hugging Face Hub and cached; the ticket
-            text never leaves your device.
-          </p>
-        </Section>
-
-        <div className="md:col-span-2 bg-amber-50 border-l-4 border-amber-400 p-4">
-          <Section title="Honest limits" pill="measured">
+        <div className="mt-3 bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500 grid md:grid-cols-2 gap-6">
+          <Section title="The problem">
             <p>
-              The guarantee bounds error over routed tickets, not for each kind of ticket:{" "}
+              Much enterprise AI work is high-volume routing and classification (support tickets, claims, alerts,
+              documents), not open-ended chat. Each item needs one of a fixed set of answers, fast, cheaply, and with a
+              known error rate.
+            </p>
+          </Section>
+
+          <Section title="Small models, at a fraction of the cost" pill="cited">
+            <p>
+              Two 2026 preprints (not peer reviewed) found that on narrow classification and intent tasks, fine-tuned
+              small encoders matched or beat zero- and few-shot frontier LLMs at roughly 100–400× lower cost per request,
+              answering in milliseconds rather than about a second. The LLMs were better at spotting out-of-scope
+              inputs. This page uses a general-purpose encoder with no fine-tuning on these intents; fine-tuning on a
+              customer&apos;s own tickets is the next step those studies point to.
+            </p>
+            <p className="text-sm">
+              <Link href="https://arxiv.org/abs/2602.06370">arXiv:2602.06370</Link> (cost per request) ·{" "}
+              <Link href="https://arxiv.org/abs/2608.20371">arXiv:2608.20371</Link> (intent detection, latency)
+            </p>
+          </Section>
+
+          <Section title="Act only when it is safe" pill="measured">
+            <p>
+              A ticket is routed only when its top label clears a threshold chosen so that, on held-out calibration
+              tickets, the 95% upper bound on the error rate of routed tickets meets your target. Everything else goes
+              to a person.
+            </p>
+            <p>
+              At the ≤{target}% target:{" "}
               {!measured ? (
-                <>
-                  at ≤{target}%, credit-card leak is <Stat tone="amber">not measured for this setup</Stat>.
-                </>
+                notMeasured
               ) : threshold === null ? (
-                <>nothing is routed at ≤{target}%, so nothing leaks, but nothing is automated either.</>
+                <>
+                  no threshold qualifies, so <Stat>every ticket escalates</Stat>.
+                </>
               ) : (
                 <>
-                  at ≤{target}%, <Stat tone="amber">{pct(testStats.leakNear)} of credit-card questions</Stat> still get
-                  routed to a banking queue.
+                  <Stat>{pct(testStats.autoRateInScope)} auto-routed</Stat> with{" "}
+                  <Stat>{pct(testStats.errorAmongActed)} error when acting</Stat> on held-out test tickets.
                 </>
-              )}{" "}
-              CLINC150 is a clean benchmark, not real tickets. Labels need tuning for each queue, and real traffic
-              drifts, so recalibrate on it.
+              )}
+            </p>
+          </Section>
+
+          <Section title="Private by construction">
+            <p>
+              The model runs in this browser tab. It is downloaded once from the Hugging Face Hub and cached; the ticket
+              text never leaves your device.
+            </p>
+          </Section>
+
+          <div className="md:col-span-2 bg-amber-50 border-l-4 border-amber-400 p-4">
+            <Section title="Honest limits" pill="measured">
+              <p>
+                The guarantee bounds error over routed tickets, not for each kind of ticket:{" "}
+                {!measured ? (
+                  <>
+                    at ≤{target}%, credit-card leak is <Stat tone="amber">not measured for this setup</Stat>.
+                  </>
+                ) : threshold === null ? (
+                  <>nothing is routed at ≤{target}%, so nothing leaks, but nothing is automated either.</>
+                ) : (
+                  <>
+                    at ≤{target}%, <Stat tone="amber">{pct(testStats.leakNear)} of credit-card questions</Stat> still get
+                    routed to a banking queue.
+                  </>
+                )}{" "}
+                CLINC150 is a clean benchmark, not real tickets. Labels need tuning for each queue, and real traffic
+                drifts, so recalibrate on it.
+              </p>
+            </Section>
+          </div>
+
+          <Section title="How an FDE would deploy it">
+            <ol className="list-decimal pl-5 flex flex-col gap-1">
+              <li>Swap in the customer&apos;s queues as labels, with a catch-all for everything else.</li>
+              <li>Write scope notes from the model&apos;s confident errors on a small dev sample.</li>
+              <li>Calibrate the threshold on a few hundred labeled tickets.</li>
+              <li>Measure on a separate held-out set before going live.</li>
+              <li>Monitor routed tickets and recalibrate as traffic drifts.</li>
+            </ol>
+          </Section>
+
+          <Section title="Relation to Jev">
+            <p>
+              TypeSafe sells this confidence-routing pattern as a closed API (Jev). This page is an open, inspectable
+              version built from open models: a comparison of approach, not a claim of equivalence.
+            </p>
+            <p className="text-sm">
+              <Link href="https://docs.typesafe.ai/patterns/confidence-routing.md">TypeSafe: confidence routing</Link> ·{" "}
+              <Link href="https://github.com/nico-martin/open-jev">open-jev</Link> · Data:{" "}
+              <Link href="https://huggingface.co/datasets/clinc/clinc_oos">CLINC150</Link> (CC BY 3.0)
             </p>
           </Section>
         </div>
-
-        <Section title="How an FDE would deploy it">
-          <ol className="list-decimal pl-5 flex flex-col gap-1">
-            <li>Swap in the customer&apos;s queues as labels, with a catch-all for everything else.</li>
-            <li>Write scope notes from the model&apos;s confident errors on a small dev sample.</li>
-            <li>Calibrate the threshold on a few hundred labeled tickets.</li>
-            <li>Measure on a separate held-out set before going live.</li>
-            <li>Monitor routed tickets and recalibrate as traffic drifts.</li>
-          </ol>
-        </Section>
-
-        <Section title="Relation to Jev">
-          <p>
-            TypeSafe sells this confidence-routing pattern as a closed API (Jev). This page is an open, inspectable
-            version built from open models: a comparison of approach, not a claim of equivalence.
-          </p>
-          <p className="text-sm">
-            <Link href="https://docs.typesafe.ai/patterns/confidence-routing.md">TypeSafe: confidence routing</Link> ·{" "}
-            <Link href="https://github.com/nico-martin/open-jev">open-jev</Link> · Data:{" "}
-            <Link href="https://huggingface.co/datasets/clinc/clinc_oos">CLINC150</Link> (CC BY 3.0)
-          </p>
-        </Section>
-      </div>
-    </details>
+      </details>
+    </section>
   );
 }

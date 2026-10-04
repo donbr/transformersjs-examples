@@ -387,47 +387,47 @@ function App() {
         </section>
       </div>
 
-      <details className="group border-t border-gray-200 pt-6">
-        <summary className="min-h-[44px] cursor-pointer list-none rounded-md py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
-          <span className="flex items-center gap-2 text-xl font-semibold text-gray-800">
-            When zero-shot classification fits
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 text-gray-500 transition-transform motion-reduce:transition-none group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </span>
-          <span className="block text-sm text-gray-500">What it&apos;s good for, and why it isn&apos;t a router</span>
-        </summary>
-        <div className="mt-3 bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500 grid md:grid-cols-2 gap-6 text-gray-700 leading-relaxed">
-          <section className="flex flex-col gap-2 max-w-prose">
-            <h3 className="text-lg font-semibold text-gray-800">How it works</h3>
-            <p>
-              The model is a small natural-language-inference classifier. For every item it checks each category as a
-              hypothesis (&ldquo;This text is about Overheating.&rdquo;) and scores how strongly the item supports it.
-              Categories are scored independently, so the scores don&apos;t add up to 1, and an item can score high for
-              more than one.
-            </p>
-          </section>
-          <section className="flex flex-col gap-2 max-w-prose">
-            <h3 className="text-lg font-semibold text-gray-800">Good for</h3>
-            <p>
-              Exploring a pile of feedback, testing whether a set of categories covers it, and drafting label wording
-              before you commit to a taxonomy. It needs no training data, and the text never leaves your browser.
-            </p>
-          </section>
-          <section className="md:col-span-2 flex flex-col gap-2 bg-amber-50 border-l-4 border-amber-400 p-4">
-            <h3 className="text-lg font-semibold text-gray-800">Not a router</h3>
-            <p>
-              The scores aren&apos;t calibrated, so a cutoff doesn&apos;t tell you how often placed items are wrong. In
-              our banking-ticket test (a different task from this page: single-label, with a &ldquo;something
-              else&rdquo; option), the same model picked the right intent for 72% of in-scope tickets. But routing every
-              ticket whose top label wasn&apos;t &ldquo;something else&rdquo; would have been wrong 53% of the time once
-              credit-card and off-topic tickets were counted: it routed 90% of credit-card questions and 77% of
-              off-topic ones as banking requests. Decide adds a certified threshold and an escalate path for exactly
-              that reason.
-            </p>
-          </section>
-        </div>
-      </details>
+      {/* The title is a real heading outside <summary>, so screen readers list and navigate it
+          however they treat a disclosure; the summary is the toggle. */}
+      <section aria-labelledby="zero-shot-explainer" className="border-t border-gray-200 pt-6">
+        <h2 id="zero-shot-explainer" className="text-xl font-semibold text-gray-800">When zero-shot classification fits</h2>
+        <details className="group">
+          <summary className="min-h-[44px] cursor-pointer list-none rounded-md py-2 inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
+            <span>What it&apos;s good for, and why it isn&apos;t a router</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-gray-500 transition-transform motion-reduce:transition-none group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+          </summary>
+          <div className="mt-3 bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500 grid md:grid-cols-2 gap-6 text-gray-700 leading-relaxed">
+            <section className="flex flex-col gap-2 max-w-prose">
+              <h3 className="text-lg font-semibold text-gray-800">How it works</h3>
+              <p>
+                The model is a small natural-language-inference classifier. For every item it checks each category as a
+                hypothesis (&ldquo;This text is about Overheating.&rdquo;) and scores how strongly the item supports it.
+                Categories are scored independently, so the scores don&apos;t add up to 1, and an item can score high for
+                more than one.
+              </p>
+            </section>
+            <section className="flex flex-col gap-2 max-w-prose">
+              <h3 className="text-lg font-semibold text-gray-800">Good for</h3>
+              <p>
+                Exploring a pile of feedback, testing whether a set of categories covers it, and drafting label wording
+                before you commit to a taxonomy. It needs no training data, and the text never leaves your browser.
+              </p>
+            </section>
+            <section className="md:col-span-2 flex flex-col gap-2 bg-amber-50 border-l-4 border-amber-400 p-4">
+              <h3 className="text-lg font-semibold text-gray-800">Not a router</h3>
+              <p>
+                The scores aren&apos;t calibrated, so a cutoff doesn&apos;t tell you how often placed items are wrong. In
+                our banking-ticket test (a different task from this page: single-label, with a &ldquo;something
+                else&rdquo; option), the same model picked the right intent for 72% of in-scope tickets. But routing every
+                ticket whose top label wasn&apos;t &ldquo;something else&rdquo; would have been wrong 53% of the time once
+                credit-card and off-topic tickets were counted: it routed 90% of credit-card questions and 77% of
+                off-topic ones as banking requests. Decide adds a certified threshold and an escalate path for exactly
+                that reason.
+              </p>
+            </section>
+          </div>
+        </details>
+      </section>
     </div>
   );
 }
