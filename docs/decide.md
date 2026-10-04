@@ -62,9 +62,63 @@ WebGPU (`tools/decide-calibration/provenance.json`): 357 MB download, 0.8 s firs
 | ≤15% | 0.32 | 88.2% | 10.6% | 18.0% | 1.3% |
 
 Error when acting stayed under the target at every certified threshold. At ≤1% no threshold
-qualifies: it would need at least 299 acted-on calibration tickets with no errors. There is one split per
-condition and no repeated runs, so differences of a few points are within sampling noise.
-`node tools/decide-calibration/eval-shipped.mjs` re-derives this table from the shipped files.
+qualifies, and it fails on errors, not sample size: the calibration split can act on up to 500
+tickets, but the first threshold acting on 299 or more is 0.31, where 40 of 305 routed tickets are
+wrong (bound 16.7%). There is one split per condition and no repeated runs, so differences of a
+few points are within sampling noise. `node tools/decide-calibration/eval-shipped.mjs` recomputes
+these results from the shipped files and checks the chart data below against them; it does not
+read this table or the chart captions.
+
+**Where the 750 test tickets go at the default ≤5% target (threshold 0.45).**
+
+```mermaid
+%%{init: {"sankey": {"linkColor": "source"}, "themeCSS": ".link { mix-blend-mode: normal !important; stroke-opacity: 0.5 !important; }"}}%%
+sankey-beta
+In-scope,Routed,306
+In-scope,Escalated to a person,144
+Credit card,Routed,5
+Credit card,Escalated to a person,145
+Off-topic,Routed,1
+Off-topic,Escalated to a person,149
+Routed,Right queue,302
+Routed,Wrong queue,4
+Routed,Out of scope but routed,6
+```
+
+*312 tickets are routed; 10 of them are errors (4 wrong queue, 6 out of scope), the 3.2% in the
+table. The other 438 go to a person.*
+
+**How coverage and errors move with the target.**
+
+```mermaid
+%%{init: {"themeVariables": {"xyChart": {"plotColorPalette": "#2563eb"}}}}%%
+xychart-beta
+  title "In-scope tickets routed (held-out test, %)"
+  x-axis "Error target" ["≤2%", "≤3%", "≤4%", "≤5%", "≤10%", "≤15%"]
+  y-axis "Routed (%)" 0 --> 100
+  line [62.4, 62.7, 65.3, 68.0, 78.9, 88.2]
+```
+
+*Blue: share of the 450 in-scope tickets routed automatically. The axis starts at ≤2% because
+there is no threshold at ≤1%, and its targets are unevenly spaced (2, 3, 4, 5, 10, 15%).*
+
+```mermaid
+%%{init: {"themeVariables": {"xyChart": {"plotColorPalette": "#64748b, #dc2626, #d97706, #7c3aed"}}}}%%
+xychart-beta
+  title "Errors and out-of-scope routing (held-out test, %)"
+  x-axis "Error target" ["≤2%", "≤3%", "≤4%", "≤5%", "≤10%", "≤15%"]
+  y-axis "Percent" 0 --> 20
+  line [2, 3, 4, 5, 10, 15]
+  line [1.8, 1.8, 1.7, 3.2, 6.8, 10.6]
+  line [0.7, 0.7, 0.7, 3.3, 7.3, 18.0]
+  line [0.7, 0.7, 0.7, 0.7, 0.7, 1.3]
+```
+
+*Slate: the target itself. Red: error when acting, which stays below the slate line at every
+target. Orange: share of the 150 credit-card questions routed. Purple: share of the 150 off-topic
+messages routed. Orange and purple overlap at 0.7% from ≤2% to ≤4%, and red and orange nearly
+coincide at ≤5% (3.2% vs 3.3%). Same uneven x-axis spacing as
+above; the guarantee covers the red line only, not the leak lines.*
 
 ## Lessons
 
@@ -100,8 +154,10 @@ These affect correctness; read them before changing labels, models or data.
    had the opposite flaw: 0 errors in 60 only bounds 4.87%, so every target below ~4.9% failed
    its first test and the page reported no threshold at ≤2–4% even though 0.52, 0.51 and 0.48
    qualify (caught in review, fixed 2026-10-04). The start depends only on the target and the
-   scores, not the labels, so the guarantee holds. It also sizes the calibration set: ≤1% here
-   would need at least 299 acted-on tickets with zero errors.
+   scores, not the labels, so the guarantee holds. It also sizes the calibration set: ≤1% needs
+   at least 299 acted-on tickets with zero errors. Here ≤1% fails on errors, not sample size: the
+   calibration split can act on up to 500 tickets, but the first threshold acting on 299 or more is
+   0.31, where 40 of 305 routed tickets are wrong (bound 16.7%).
 4. **Label scope notes are the biggest lever.** At the ≤5% target on the spike split, notes took
    GLiNER2.5-Decide from 0% to 18.5% of all tickets routed and open-jev from 14.1% to 38.9%:
    more than switching models did. Write them from confident errors on the dev split, never
