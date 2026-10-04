@@ -4,6 +4,7 @@ import { certifyThreshold, decide, ESCAPE_KEY, evaluate } from "./calibration.js
 import calibrationData from "./data/calibration.json";
 import testData from "./data/test.json";
 import WhyTypedDecisions from "./WhyTypedDecisions.jsx";
+import { RUNTIME } from "./stats.js";
 import { primaryButton, secondaryButton } from "../../ui/buttons.js";
 
 const SAMPLES = [
@@ -46,7 +47,10 @@ function LoadCard({ load }) {
     active: "bg-blue-100 text-blue-800",
     todo: "bg-gray-100 text-gray-500",
   };
-  const size = load.total ? `${MB(load.total)} MB` : "about 357 MB";
+  // Until the worker reports the real size, name both: the download depends on the device.
+  const size = load.total
+    ? `${MB(load.total)} MB`
+    : `${RUNTIME.downloadWebGPU} on WebGPU or ${RUNTIME.downloadWasm} on WASM`;
 
   return (
     <Card accent="border-blue-500" label="Model loading">
@@ -268,8 +272,10 @@ function App() {
   const requestId = useRef(0);
   const runId = useRef(0);
   const currentKey = labelsKey(labels);
-  const currentLabelsKey = useRef(currentKey);
-  currentLabelsKey.current = currentKey;
+  // Labels and ticket text of the in-flight decide request, captured when it is sent: the
+  // reply belongs to them even if either changes before it arrives.
+  const pendingLabelsKey = useRef(null);
+  const pendingText = useRef(null);
   const pendingCalibrationKey = useRef(null);
 
   useEffect(() => {
@@ -292,9 +298,10 @@ function App() {
           setStatus("ready");
           break;
         case "decision":
-          // Ignore answers to tickets that were superseded or whose labels changed.
+          // Ignore answers to superseded requests; tag the result with the labels and ticket text
+          // it was scored under, so showResult hides it once either one changes.
           if (msg.id === requestId.current) {
-            setResult({ probs: msg.probs, ms: msg.ms, labelsKey: currentLabelsKey.current });
+            setResult({ probs: msg.probs, ms: msg.ms, labelsKey: pendingLabelsKey.current, text: pendingText.current });
             setStatus("ready");
           }
           break;
@@ -382,8 +389,10 @@ function App() {
     setError(null);
     setStatus("deciding");
     requestId.current += 1;
+    pendingLabelsKey.current = currentKey;
+    pendingText.current = ticket.trim();
     worker.current.postMessage({ type: "decide", id: requestId.current, text: ticket.trim(), labels });
-  }, [canDecide, ticket, labels]);
+  }, [canDecide, ticket, labels, currentKey]);
 
   const retryLoad = () => {
     setError(null);
@@ -394,6 +403,8 @@ function App() {
   };
 
   const recalibrate = () => {
+    // One model call at a time: a recalibration started mid-decision would run concurrently.
+    if (status !== "ready" || calibrating) return;
     setError(null);
     runId.current += 1;
     pendingCalibrationKey.current = currentKey;
@@ -411,10 +422,12 @@ function App() {
     setEditing(false);
   };
 
-  const showResult = result && result.labelsKey === currentKey;
+  // A verdict only shows for the labels and ticket text it was computed from.
+  const showResult = result && result.labelsKey === currentKey && result.text === ticket.trim();
 
   return (
-    // The demo wrapper in src/App.jsx provides the max-w-6xl column and the page scroll.
+    // The demo wrapper in src/App.jsx provides the max-w-6xl column; the page scrolls in
+    // Layout's <main className="layout-content"> (src/Layout.jsx).
     <div className="flex flex-col gap-5 pb-10">
       <header className="flex flex-wrap justify-between items-end gap-3">
         <div className="max-w-2xl">
@@ -541,7 +554,7 @@ function App() {
                 <button
                   type="button"
                   onClick={recalibrate}
-                  disabled={!ready || !!calibrating}
+                  disabled={status !== "ready" || !!calibrating}
                   className={`${primaryButton} px-4 py-2.5`}
                 >
                   {calibrating ? `Recalibrating… ${calibrating.done} / ${calibrating.total}` : "Recalibrate"}
@@ -599,7 +612,8 @@ function App() {
             draft={draft}
             setDraft={setDraft}
             edited={currentKey !== DEFAULT_KEY}
-            disabled={!!calibrating}
+            // No label edits while a decision or recalibration is running.
+            disabled={!!calibrating || status === "deciding"}
             onEdit={() => {
               setDraft(labels);
               setEditing(true);

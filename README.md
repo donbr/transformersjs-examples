@@ -10,7 +10,7 @@ This repository contains a collection of example applications demonstrating the 
 
 - **Multiple Models in One App**: Collection of TransformersJS examples integrated in a single application
 - **Deployment**: Configured for Vercel; other hosts work if they provide SPA routing and the COOP/COEP headers
-- **In-Browser Inference**: Models run client-side on WebAssembly (ONNX Runtime), with no backend
+- **In-Browser Inference**: Models run client-side with ONNX Runtime Web (WebGPU when available for Decide, otherwise WebAssembly), with no inference server
 - **Cross-Origin Isolation**: Properly configured headers for SharedArrayBuffer support
 
 ## 🧩 Included Models & Examples
@@ -19,7 +19,7 @@ The application includes examples for various machine learning tasks:
 
 | Model | Description | Model ID | Backend |
 |-------|-------------|----------|---------|
-| Decide | Auto-route or escalate a support ticket using a calibrated confidence threshold | onnx-community/open-jev-deberta-v3-large-ONNX (via `open-jev`) | Preferred (WASM fallback) |
+| Decide | Auto-route or escalate a support ticket using a calibrated confidence threshold | onnx-community/open-jev-deberta-v3-large-ONNX (via `open-jev`) | WebGPU preferred (WASM fallback) |
 | Cross Encoder | Text similarity and relevance scoring | mixedbread-ai/mxbai-rerank-xsmall-v1 | WASM |
 | Zero-Shot Classification | Classify text without specific training | MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33 | WASM |
 
@@ -70,11 +70,17 @@ Hosts that cannot set response headers, such as GitHub Pages, still run the demo
 ```
 ├── src/                # Source code for the unified application
 │   ├── demos/          # Individual model demos (App.jsx UI + worker.js inference)
+│   │   └── registry.js # The list of demos (live and planned) read by the homepage and header
+│   ├── hooks/          # Shared React hooks
+│   ├── ui/             # Shared UI styles (button classes)
 │   ├── utils/          # Shared worker runtime and viewport-height fix
 │   ├── App.jsx         # Main application with routing
-│   ├── Layout.jsx      # App shell (header, scrolling content area, footer)
+│   ├── Layout.jsx      # App shell (header, scrolling content area, route error boundary)
+│   ├── SiteHeader.jsx  # Breadcrumb, nav, mobile menu and model chip
+│   ├── RouteErrorBoundary.jsx  # "This page couldn't load" fallback for a failed page
 │   └── HomePage.jsx    # Directory of available demos
 ├── docs/decide.md      # /decide method, results, lessons and sources
+├── docs/facts.md       # Every claim on the site, its source and how to re-check it
 ├── tools/decide-calibration/  # Rebuild and check /decide's calibration data
 ├── index.html          # HTML entry point
 ├── vercel.json         # Deployment configuration for Vercel
@@ -88,7 +94,7 @@ Hosts that cannot set response headers, such as GitHub Pages, still run the demo
 - **Styling**: Tailwind CSS
 - **Routing**: React Router with SPA routing
 - **Model Loading**: Web Workers for non-blocking UI
-- **Inference**: ONNX Runtime WebAssembly, multi-threaded when the page is cross-origin isolated
+- **Inference**: ONNX Runtime Web: WebGPU for Decide when available, otherwise WebAssembly (multi-threaded when the page is cross-origin isolated)
 
 ### Mobile Compatibility
 

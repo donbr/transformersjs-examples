@@ -34,7 +34,7 @@ export const demos = [
     id: 'cross-encoder',
     name: 'Cross Encoder',
     shortName: 'Reranking',
-    description: 'Score how relevant each passage is to a query, then rank them. The planned /verify builds on it.',
+    description: 'Score how relevant each passage is to a query, then rank them. The planned /verify reads pairs the same way, with an NLI model.',
     accent: 'border-green-500',
     modelName: 'mxbai-rerank-xsmall-v1',
     modelId: 'mixedbread-ai/mxbai-rerank-xsmall-v1',
@@ -58,7 +58,7 @@ export const demos = [
     shortName: 'Verify',
     description:
       'Is this quote or citation actually supported by its source? Exact match first, then a small NLI model returns supports, contradicts or not mentioned.',
-    detail: '/verify · extends Cross Encoder',
+    detail: '/verify · NLI model, reads pairs like Cross Encoder',
     accent: 'border-purple-500',
     status: 'planned',
   },

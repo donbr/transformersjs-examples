@@ -3,8 +3,8 @@
 //
 // HEADLINE is asserted against the shipped data by tools/decide-calibration/eval-shipped.mjs,
 // so a re-score that changes it fails that check until this file is updated.
-// RUNTIME is measured (docs/decide.md, tools/decide-calibration/provenance.json); update it
-// with those when the model, dtype or device selection changes.
+// RUNTIME is measured; its sources are the download-size, first-load and per-ticket rows in
+// docs/facts.md. Update those rows with it when the model, dtype or device selection changes.
 export const HEADLINE = {
   target: 0.05,
   threshold: 0.45,

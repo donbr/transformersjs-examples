@@ -106,6 +106,8 @@ function App() {
   const run = useCallback(() => {
     if (!canRank) return;
     setError(null);
+    // Clear the old ranking: if this run fails, nothing stale is left on screen.
+    setResults([]);
     setStatus("processing");
     worker.current.postMessage({ query: query.trim(), documents: passages.join("\n") });
   }, [canRank, query, passages]);
@@ -136,8 +138,9 @@ function App() {
         </h1>
         <p className="text-gray-700 sm:text-[17px] leading-relaxed">
           A cross-encoder reads the question and each passage together, then orders the passages by relevance.
-          That&apos;s the second stage of search and RAG, after a fast retriever has pulled candidates. It&apos;s also
-          the base for the planned Verify tool.
+          That&apos;s the second stage of search and RAG, after a fast retriever has pulled candidates. The planned
+          Verify tool uses the same read-both-together design, with an NLI model; this reranker can choose which
+          passages it checks.
         </p>
       </header>
 
@@ -169,12 +172,13 @@ function App() {
             <input
               id="query"
               value={query}
+              readOnly={busy}
               onChange={(e) => {
                 setQuery(e.target.value);
                 setSample(null);
                 setResults([]);
               }}
-              className="px-3 py-2.5 border border-gray-300 rounded-md"
+              className="px-3 py-2.5 border border-gray-300 rounded-md read-only:bg-gray-50 read-only:text-gray-500"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -190,12 +194,13 @@ function App() {
               id="passages"
               rows={10}
               value={documents}
+              readOnly={busy}
               onChange={(e) => {
                 setDocuments(e.target.value);
                 setSample(null);
                 setResults([]);
               }}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-md resize-y text-sm"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-md resize-y text-sm read-only:bg-gray-50 read-only:text-gray-500"
             />
           </div>
           <div>
@@ -267,46 +272,47 @@ function App() {
         </section>
       </div>
 
-      <details className="group border-t border-gray-200 pt-6">
-        <summary className="min-h-[44px] cursor-pointer list-none rounded-md py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
-          <span className="flex items-center gap-2 text-xl font-semibold text-gray-800">
-            Where a reranker fits
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 text-gray-500 transition-transform motion-reduce:transition-none group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </span>
-          <span className="block text-sm text-gray-500">Retrieve wide, rerank narrow, and why it reads pairs</span>
-        </summary>
-        <div className="mt-3 bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500 grid md:grid-cols-2 gap-6 text-gray-700 leading-relaxed">
-          <section className="flex flex-col gap-2 max-w-prose">
-            <h3 className="text-lg font-semibold text-gray-800">Retrieve wide, rerank narrow</h3>
-            <p>
-              Search and RAG systems usually find candidates first with something fast, such as keyword search or
-              embeddings compared by similarity, then rerank the top few dozen with a slower, more careful model. This
-              page is that second step.
-            </p>
-          </section>
-          <section className="flex flex-col gap-2 max-w-prose">
-            <h3 className="text-lg font-semibold text-gray-800">Why it reads pairs</h3>
-            <p>
-              An embedding model encodes the question and each passage separately, so passages can be embedded once
-              and indexed ahead of time. A cross-encoder reads the question and one passage together in a single pass,
-              so it can weigh how they relate. That&apos;s usually more accurate on reranking benchmarks, but it needs a
-              model run for every question–passage pair and nothing can be precomputed, so it only reranks a
-              retriever&apos;s top candidates.
-            </p>
-          </section>
-          <section className="md:col-span-2 flex flex-col gap-2 bg-amber-50 border-l-4 border-amber-400 p-4">
-            <h3 className="text-lg font-semibold text-gray-800">Relevance isn&apos;t truth</h3>
-            <p>
-              The score shown is the model&apos;s raw output squashed to 0–1. It isn&apos;t a calibrated probability,
-              it isn&apos;t comparable across different questions, and it measures whether a passage is on topic, not
-              whether it&apos;s correct: a confident, wrong passage can rank first. Checking whether a source actually
-              supports a claim is the job of the planned Verify tool, which builds on this model.
-            </p>
-          </section>
-        </div>
-      </details>
+      {/* The title is a real heading outside <summary>, so screen readers list and navigate it
+          however they treat a disclosure; the summary is the toggle. */}
+      <section aria-labelledby="reranker-explainer" className="border-t border-gray-200 pt-6">
+        <h2 id="reranker-explainer" className="text-xl font-semibold text-gray-800">Where a reranker fits</h2>
+        <details className="group">
+          <summary className="min-h-[44px] cursor-pointer list-none rounded-md py-2 inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
+            <span>Retrieve wide, rerank narrow, and why it reads pairs</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-gray-500 transition-transform motion-reduce:transition-none group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+          </summary>
+          <div className="mt-3 bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500 grid md:grid-cols-2 gap-6 text-gray-700 leading-relaxed">
+            <section className="flex flex-col gap-2 max-w-prose">
+              <h3 className="text-lg font-semibold text-gray-800">Retrieve wide, rerank narrow</h3>
+              <p>
+                Search and RAG systems usually find candidates first with something fast, such as keyword search or
+                embeddings compared by similarity, then rerank the top few dozen with a slower, more careful model. This
+                page is that second step.
+              </p>
+            </section>
+            <section className="flex flex-col gap-2 max-w-prose">
+              <h3 className="text-lg font-semibold text-gray-800">Why it reads pairs</h3>
+              <p>
+                An embedding model encodes the question and each passage separately, so passages can be embedded once
+                and indexed ahead of time. A cross-encoder reads the question and one passage together in a single pass,
+                so it can weigh how they relate. That&apos;s usually more accurate on reranking benchmarks, but it needs a
+                model run for every question–passage pair and nothing can be precomputed, so it only reranks a
+                retriever&apos;s top candidates.
+              </p>
+            </section>
+            <section className="md:col-span-2 flex flex-col gap-2 bg-amber-50 border-l-4 border-amber-400 p-4">
+              <h3 className="text-lg font-semibold text-gray-800">Relevance isn&apos;t truth</h3>
+              <p>
+                The score shown is the model&apos;s raw output squashed to 0–1. It isn&apos;t a calibrated probability,
+                it isn&apos;t comparable across different questions, and it measures whether a passage is on topic, not
+                whether it&apos;s correct: a confident, wrong passage can rank first. Checking whether a source actually
+                supports a claim is the job of the planned Verify tool, which uses the same read-both-together design
+                with an NLI model; the reranker can choose which passages to check.
+              </p>
+            </section>
+          </div>
+        </details>
+      </section>
     </div>
   );
 }
