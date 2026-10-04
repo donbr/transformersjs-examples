@@ -152,12 +152,15 @@ function App() {
   };
 
   // Group results: the top label wins if it clears the cutoff and is still a category.
+  // `reason` says why an item went to Other, for its tooltip.
   const groups = useMemo(() => {
     const byName = new Map([...categories, OTHER].map((name) => [name, []]));
     for (const r of results) {
       const top = r.labels[0];
-      const placed = r.scores[0] >= cutoff && byName.has(top) && top !== OTHER ? top : OTHER;
-      byName.get(placed).push({ text: r.sequence, label: top, score: r.scores[0], placed: placed !== OTHER });
+      const stillCategory = byName.has(top) && top !== OTHER;
+      const reason = !stillCategory ? "removed" : r.scores[0] < cutoff ? "below" : null;
+      const placed = reason ? OTHER : top;
+      byName.get(placed).push({ text: r.sequence, label: top, score: r.scores[0], placed: !reason, reason });
     }
     return [...byName].map(([name, list]) => ({ name, items: list })).filter((g) => g.items.length > 0);
   }, [results, categories, cutoff]);
@@ -359,7 +362,13 @@ function App() {
                     <span className="text-gray-700">{it.text}</span>
                     <span
                       className={`font-mono text-right ${it.placed ? "text-green-800" : "text-gray-400"}`}
-                      title={`Top label: ${it.label}`}
+                      title={
+                        it.reason === "removed"
+                          ? `Its closest category, "${it.label}", was removed`
+                          : it.reason === "below"
+                            ? `Closest category: ${it.label} (below the minimum score)`
+                            : `Top category: ${it.label}`
+                      }
                     >
                       {it.score.toFixed(2)}
                     </span>
@@ -370,8 +379,9 @@ function App() {
           )}
           {groups.length > 0 && (
             <span className="text-sm text-gray-500">
-              Each score is the model&apos;s confidence in the item&apos;s top category. Grey scores fell below the
-              minimum and went to Other; hover a score to see the category it was closest to.
+              Each score is the model&apos;s confidence in the item&apos;s top category. Grey scores went to Other,
+              either because they fell below the minimum or because that category was removed; hover a score to see
+              which.
             </span>
           )}
         </section>
