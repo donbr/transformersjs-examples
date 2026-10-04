@@ -1,5 +1,5 @@
 // Algorithm check: src/demos/decide/calibration.js must reproduce analyze.py's report.json
-// (threshold, coverage, error, near-OOS leak at 5% and 10%) on every spike score file
+// (threshold, overall and in-scope coverage, error, near- and far-OOS leak at 5% and 10%) on every spike score file
 // in this directory. Run analyze.py first. Checks the algorithm, not the shipped data
 // (that is eval-shipped.mjs).
 import fs from "node:fs";
@@ -13,8 +13,16 @@ for (const f of fs.readdirSync(".").filter((f) => /^scores-.*\.json$/.test(f) &&
     const thr = certifyThreshold(d.results.calibration, d.keys, target);
     const ev = evaluate(d.results.test, d.keys, thr);
     const exp = py[key];
-    const same = thr === exp.threshold && Math.abs(ev.autoRateAll - exp.auto_rate_all) < 1e-9 &&
-      (ev.errorAmongActed ?? -1) - (exp.error_among_acted ?? -1) < 1e-9 && Math.abs(ev.leakNear - exp.false_accept_near) < 1e-9;
+    // Two-sided: a JS error rate below Python's must fail too (the unsafe direction
+    // for an error claim), and null (nothing acted on) must match null exactly.
+    const close = (x, y) => (x == null || y == null ? x == null && y == null : Math.abs(x - y) < 1e-9);
+    const same =
+      thr === exp.threshold &&
+      close(ev.autoRateAll, exp.auto_rate_all) &&
+      close(ev.autoRateInScope, exp.auto_rate_in_scope) &&
+      close(ev.errorAmongActed, exp.error_among_acted) &&
+      close(ev.leakNear, exp.false_accept_near) &&
+      close(ev.leakFar, exp.false_accept_far);
     if (!same) fails++;
     console.log(`${same ? "ok  " : "FAIL"} ${d.which.padEnd(36)} ${key}: js ${thr} / py ${exp.threshold}  auto ${ev.autoRateAll.toFixed(4)} / ${exp.auto_rate_all.toFixed(4)}`);
   }

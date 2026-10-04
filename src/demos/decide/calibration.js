@@ -6,13 +6,26 @@
 //
 // The threshold is the loosest value, scanned strict to loose, whose one-sided
 // Clopper-Pearson upper bound on acted-on error stays at or under the target
-// (fixed-sequence testing, as in Learn-then-Test). The scan starts where at least
-// MIN_ACTED calibration items would be acted on; that start depends only on the
+// (fixed-sequence testing, as in Learn-then-Test). The scan starts at the first
+// threshold that acts on at least minActedFor(target) calibration items: the
+// smallest sample whose zero-error bound can meet the target (59 at 5%, 99 at 3%),
+// and never fewer than MIN_ACTED. That start depends only on the target and the
 // scores, never on the labels, so the guarantee is kept.
 
 export const ESCAPE_KEY = "other";
 export const MIN_ACTED = 60;
 const CONFIDENCE = 0.95;
+
+/**
+ * Acted-on items needed before the scan tests a threshold: the smallest n whose
+ * zero-error Clopper-Pearson bound, 1 - (1 - confidence)^(1/n), is within the
+ * target, floored at MIN_ACTED. A fixed floor alone made every target below
+ * ~4.9% fail its first test (0 errors in 60 only bounds 4.87%).
+ */
+export function minActedFor(target, confidence = CONFIDENCE) {
+  if (!(target > 0 && target < 1)) return Infinity;
+  return Math.max(MIN_ACTED, Math.ceil(Math.log(1 - confidence) / Math.log(1 - target)));
+}
 
 function topLabel(probs, keys) {
   let best = 0;
@@ -72,11 +85,12 @@ export function clopperPearsonUpper(k, n, confidence = CONFIDENCE) {
  */
 export function certifyThreshold(items, keys, target) {
   const tops = items.map((item) => ({ item, ...topLabel(item.probs, keys) }));
+  const minActed = minActedFor(target);
   let chosen = null;
   for (let step = 99; step >= 1; step--) {
     const threshold = step / 100;
     const acted = tops.filter((t) => t.key !== ESCAPE_KEY && t.p >= threshold);
-    if (acted.length < MIN_ACTED) continue;
+    if (acted.length < minActed) continue;
     const errors = acted.filter((t) => actedError(t.item, t.key)).length;
     if (clopperPearsonUpper(errors, acted.length) <= target) chosen = threshold;
     else break;

@@ -1,5 +1,5 @@
 // Data check: certify thresholds on the SHIPPED src/demos/decide/data/calibration.json and
-// evaluate them on data/test.json, the same way the /decide page does, at 3/5/10/15% targets.
+// evaluate them on data/test.json, the same way the /decide page does, at 1/2/3/4/5/10/15% targets.
 // Exits non-zero if the results differ from EXPECTED. After re-scoring, update EXPECTED
 // together with the numbers in docs/decide.md, CLAUDE.md, README.md and the PR text. The
 // homepage reads src/demos/decide/stats.js, whose HEADLINE is checked at the end.
@@ -14,7 +14,10 @@ const test = read("test.json");
 
 // target -> [threshold, test in-scope routed, test error when acting, near-OOS leak, far-OOS leak]
 const EXPECTED = {
-  3: [null, 0, null, 0, 0],
+  1: [null, 0, null, 0, 0],
+  2: [0.52, 0.624, 0.018, 0.007, 0.007],
+  3: [0.51, 0.627, 0.018, 0.007, 0.007],
+  4: [0.48, 0.653, 0.017, 0.007, 0.007],
   5: [0.45, 0.68, 0.032, 0.033, 0.007],
   10: [0.38, 0.789, 0.068, 0.073, 0.007],
   15: [0.32, 0.882, 0.106, 0.18, 0.013],
