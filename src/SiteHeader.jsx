@@ -66,10 +66,17 @@ function RuntimePill({ demo }) {
 
 function NavLink({ item, variant, onNavigate }) {
   const styles = navStyles[variant];
+  const { pathname } = useLocation();
   if (item.kind === 'route') {
-    // Every page of this app is a tool, so "Tools" is always the current section.
+    // Every page of this app is a tool, so "Tools" is always the current section: it is the
+    // current *page* only on its own route, and the current item (aria-current="true") below it.
     return (
-      <Link to={item.to} className={`${styles.base} ${styles.active}`} aria-current="page" onClick={onNavigate}>
+      <Link
+        to={item.to}
+        className={`${styles.base} ${styles.active}`}
+        aria-current={pathname === item.to ? 'page' : 'true'}
+        onClick={onNavigate}
+      >
         {item.label}
       </Link>
     );
