@@ -268,9 +268,10 @@ function App() {
   const requestId = useRef(0);
   const runId = useRef(0);
   const currentKey = labelsKey(labels);
-  // Label key of the in-flight decide request, captured when it is sent: the reply's
-  // probabilities belong to those labels even if the labels change before it arrives.
+  // Labels and ticket text of the in-flight decide request, captured when it is sent: the
+  // reply belongs to them even if either changes before it arrives.
   const pendingLabelsKey = useRef(null);
+  const pendingText = useRef(null);
   const pendingCalibrationKey = useRef(null);
 
   useEffect(() => {
@@ -296,7 +297,7 @@ function App() {
           // Ignore answers to superseded requests; tag the result with the labels it was
           // scored under, so showResult hides it once the labels differ.
           if (msg.id === requestId.current) {
-            setResult({ probs: msg.probs, ms: msg.ms, labelsKey: pendingLabelsKey.current });
+            setResult({ probs: msg.probs, ms: msg.ms, labelsKey: pendingLabelsKey.current, text: pendingText.current });
             setStatus("ready");
           }
           break;
@@ -385,6 +386,7 @@ function App() {
     setStatus("deciding");
     requestId.current += 1;
     pendingLabelsKey.current = currentKey;
+    pendingText.current = ticket.trim();
     worker.current.postMessage({ type: "decide", id: requestId.current, text: ticket.trim(), labels });
   }, [canDecide, ticket, labels, currentKey]);
 
@@ -414,7 +416,8 @@ function App() {
     setEditing(false);
   };
 
-  const showResult = result && result.labelsKey === currentKey;
+  // A verdict only shows for the labels and ticket text it was computed from.
+  const showResult = result && result.labelsKey === currentKey && result.text === ticket.trim();
 
   return (
     // The demo wrapper in src/App.jsx provides the max-w-6xl column and the page scroll.
