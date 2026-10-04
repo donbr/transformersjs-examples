@@ -399,6 +399,8 @@ function App() {
   };
 
   const recalibrate = () => {
+    // One model call at a time: a recalibration started mid-decision would run concurrently.
+    if (status !== "ready" || calibrating) return;
     setError(null);
     runId.current += 1;
     pendingCalibrationKey.current = currentKey;
@@ -547,7 +549,7 @@ function App() {
                 <button
                   type="button"
                   onClick={recalibrate}
-                  disabled={!ready || !!calibrating}
+                  disabled={status !== "ready" || !!calibrating}
                   className={`${primaryButton} px-4 py-2.5`}
                 >
                   {calibrating ? `Recalibrating… ${calibrating.done} / ${calibrating.total}` : "Recalibrate"}
