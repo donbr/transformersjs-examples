@@ -4,6 +4,7 @@ import { certifyThreshold, decide, ESCAPE_KEY, evaluate } from "./calibration.js
 import calibrationData from "./data/calibration.json";
 import testData from "./data/test.json";
 import WhyTypedDecisions from "./WhyTypedDecisions.jsx";
+import { RUNTIME } from "./stats.js";
 import { primaryButton, secondaryButton } from "../../ui/buttons.js";
 
 const SAMPLES = [
@@ -46,7 +47,10 @@ function LoadCard({ load }) {
     active: "bg-blue-100 text-blue-800",
     todo: "bg-gray-100 text-gray-500",
   };
-  const size = load.total ? `${MB(load.total)} MB` : "about 357 MB";
+  // Until the worker reports the real size, name both: the download depends on the device.
+  const size = load.total
+    ? `${MB(load.total)} MB`
+    : `${RUNTIME.downloadWebGPU} on WebGPU or ${RUNTIME.downloadWasm} on WASM`;
 
   return (
     <Card accent="border-blue-500" label="Model loading">
@@ -422,7 +426,8 @@ function App() {
   const showResult = result && result.labelsKey === currentKey && result.text === ticket.trim();
 
   return (
-    // The demo wrapper in src/App.jsx provides the max-w-6xl column and the page scroll.
+    // The demo wrapper in src/App.jsx provides the max-w-6xl column; the page scrolls in
+    // Layout's <main className="layout-content"> (src/Layout.jsx).
     <div className="flex flex-col gap-5 pb-10">
       <header className="flex flex-wrap justify-between items-end gap-3">
         <div className="max-w-2xl">
