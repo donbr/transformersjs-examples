@@ -138,8 +138,9 @@ function App() {
         </h1>
         <p className="text-gray-700 sm:text-[17px] leading-relaxed">
           A cross-encoder reads the question and each passage together, then orders the passages by relevance.
-          That&apos;s the second stage of search and RAG, after a fast retriever has pulled candidates. It&apos;s also
-          the base for the planned Verify tool.
+          That&apos;s the second stage of search and RAG, after a fast retriever has pulled candidates. The planned
+          Verify tool uses the same read-both-together design, with an NLI model; this reranker can choose which
+          passages it checks.
         </p>
       </header>
 
@@ -306,7 +307,8 @@ function App() {
               The score shown is the model&apos;s raw output squashed to 0–1. It isn&apos;t a calibrated probability,
               it isn&apos;t comparable across different questions, and it measures whether a passage is on topic, not
               whether it&apos;s correct: a confident, wrong passage can rank first. Checking whether a source actually
-              supports a claim is the job of the planned Verify tool, which builds on this model.
+              supports a claim is the job of the planned Verify tool, which uses the same read-both-together design
+              with an NLI model; the reranker can choose which passages to check.
             </p>
           </section>
         </div>
