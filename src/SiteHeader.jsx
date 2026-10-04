@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { demoForPath, runtimeLabel, runtimeTitle } from './demos/registry.js';
+import { demoForPath, modelUrl, runtimeLabel } from './demos/registry.js';
 
 // Site header, aligned with donbr.github.io's Layout.tsx (nav styles, 44px menu button,
 // menu closing on navigation / Escape / lg). Differences forced by this app's shell:
@@ -54,13 +54,12 @@ function Icon({ name, className }) {
   );
 }
 
-function RuntimePill({ runtime }) {
+// Omitted for liveRuntime demos, whose page shows the device it actually loaded.
+function RuntimePill({ demo }) {
+  if (demo.liveRuntime) return null;
   return (
-    <span
-      className="text-xs font-bold uppercase tracking-wider px-1.5 rounded bg-blue-100 text-blue-800 whitespace-nowrap"
-      title={runtimeTitle(runtime)}
-    >
-      {runtimeLabel(runtime)}
+    <span className="shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 rounded bg-blue-100 text-blue-800 whitespace-nowrap">
+      {runtimeLabel(demo.runtime)}
     </span>
   );
 }
@@ -141,16 +140,17 @@ export default function SiteHeader() {
     <nav className="w-full h-full" aria-label="Primary">
       <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between gap-4">
         {/* Breadcrumb. Below lg on demo routes the wordmark moves into the menu as "Portfolio".
-            Links are inline-flex + items-center: index.css gives mobile links a 44px min-height. */}
+            Links are inline-flex + items-center + shrink-0: index.css gives mobile links a 44px
+            min-height and min-width, which would otherwise let them shrink under their text. */}
         <div className="flex items-center gap-2 min-w-0 text-base">
           <a
             href={PORTFOLIO}
-            className={`items-center font-semibold text-gray-700 text-lg whitespace-nowrap hover:text-gray-900 ${demo ? 'hidden lg:inline-flex' : 'inline-flex'}`}
+            className={`shrink-0 items-center font-semibold text-gray-700 text-lg whitespace-nowrap hover:text-gray-900 ${demo ? 'hidden lg:inline-flex' : 'inline-flex'}`}
           >
             Don Branson
           </a>
           <span className={demo ? 'hidden lg:inline' : ''}>{separator}</span>
-          <Link to="/" className="inline-flex items-center text-gray-700 whitespace-nowrap hover:text-gray-900">
+          <Link to="/" className="shrink-0 inline-flex items-center text-gray-700 whitespace-nowrap hover:text-gray-900">
             Transformers.js
           </Link>
           {demo && (
@@ -164,10 +164,8 @@ export default function SiteHeader() {
           {demo && (
             // Lowest priority in the row: the model id truncates before the demo name does.
             <span className="hidden xl:flex items-center gap-2 ml-2 min-w-0" title={demo.modelId}>
-              <span className="font-mono text-sm bg-gray-100 px-1.5 rounded truncate min-w-0">{demo.modelId}</span>
-              <span className="shrink-0">
-                <RuntimePill runtime={demo.runtime} />
-              </span>
+              <span className="font-mono text-sm bg-gray-100 px-1.5 rounded truncate min-w-0">{demo.modelName}</span>
+              <RuntimePill demo={demo} />
             </span>
           )}
         </div>
@@ -209,9 +207,17 @@ export default function SiteHeader() {
             <div className="mt-2 pt-3 pb-1 px-2 border-t border-gray-200 flex flex-col gap-1.5">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Model</span>
               <span className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-sm bg-gray-100 px-1.5 rounded break-all">{demo.modelId}</span>
-                <RuntimePill runtime={demo.runtime} />
+                <a
+                  href={modelUrl(demo)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center font-mono text-sm text-blue-600 underline underline-offset-2 hover:text-blue-800"
+                >
+                  {demo.modelName}
+                </a>
+                <RuntimePill demo={demo} />
               </span>
+              <span className="text-xs text-gray-500 break-words">{demo.modelId}</span>
             </div>
           )}
         </div>
