@@ -81,7 +81,7 @@ Expected for the shipped labels:
    ```
 6. **Check it:** run `node tools/decide-calibration/eval-shipped.mjs`, then update these
    together: its `EXPECTED` table, `HEADLINE` in `src/demos/decide/stats.js` (the homepage card;
-   also checked by this script), the results table and lessons in `docs/decide.md`, the Expected
+   also checked by this script), the results table, charts and lessons in `docs/decide.md`, the Expected
    table above, the /decide rows in `docs/facts.md`, and the PR text.
 7. **Check the app:** `npm run build`, then on `/decide` load the model, decide a sample ticket,
    move the error-target slider, and use Edit → Reset.
