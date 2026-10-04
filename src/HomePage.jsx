@@ -197,7 +197,7 @@ function HomePage() {
             <SectionHeading
               id="live-heading"
               title="Available now"
-              subtitle="Everything runs on-device in any modern browser. Decide is faster with WebGPU."
+              subtitle="Everything runs on-device in any modern browser. Decide uses WebGPU when available."
             />
             <div className="flex flex-col gap-6">
               {flagship && <DecideFlagshipCard demo={flagship} />}
