@@ -146,6 +146,8 @@ These affect correctness; read them before changing labels, models or data.
 Spike split, same 750 test tickets. Rows with scope notes were calibrated on the same CLINC
 validation set the notes were written from, so their thresholds are not valid guarantees; rows
 without notes never used validation for anything else, so theirs are. "Routed" is the share of all test tickets acted on.
+The Chrome row was run after the choice, to check that the chosen setup held up in a browser;
+it was not a candidate.
 
 | Model | Runtime | Notes | In-scope top-1 | Threshold | Routed | Error when acting | p50 |
 |-------|---------|-------|----------------|-----------|--------|-------------------|-----|
@@ -159,6 +161,44 @@ without notes never used validation for anything else, so theirs are. "Routed" i
 | NLI DeBERTa-v3-xsmall | Node, q8, CPU | no | 71.6% | none | 0% | – | 178 ms |
 
 Source: `tools/decide-calibration/report.json`.
+
+### How the model was selected
+
+The research session picked open-jev with scope notes during the spike on 2026-10-03 and
+recommended it in the published spike results. The user approved the spike plan and then asked
+for /decide to be built on that recommendation, but was not asked to choose between models.
+This account is from that session's record.
+
+- **Deciding number:** coverage at a certified ≤5% target, measured on the 750 test tickets:
+  open-jev with notes routed 38.9% at 1.7% error, GLiNER2.5-Decide with notes 18.5% at 2.2%,
+  and the NLI models had no qualifying threshold. In-scope top-1 was nearly tied (93.6% vs 93.1%
+  without notes) and played no part; ECE was set aside because both large encoders were
+  underconfident (lesson 6). Validation numbers were not used to choose between models.
+- **Tie-breakers, not weighted formally:** open-jev ships in the published `open-jev` npm
+  package (0.1.2), while GLiNER2.5-Decide needed unmerged open-jev PR #1 built by hand; smaller
+  q4f16 weights (348 MB vs 523 MB); lower CPU latency (526 ms vs 699 ms with notes). They
+  would have decided it had the coverage gap been small.
+- **The comparison favored two models.** Scope notes were written from the confident errors of
+  open-jev and GLiNER2.5-Decide on the validation set, and only those two got a with-notes run.
+  The NLI models and kev-0.6b were compared with plain labels only.
+- **Selection used the test split.** The choice was made on the same 750 tickets that became the
+  shipped test split, after notes were tuned on two of the candidates. That is a second reason,
+  beyond the test reuse noted under Data, to read the shipped test numbers as mildly optimistic.
+- **Noise.** One split, no repeated runs. The 38.9% vs 18.5% gap is large enough to matter;
+  smaller gaps in the table (open-jev without notes 14.1% vs kev-0.6b 16.5%) are within noise.
+- **Not tried.** Before `score.mjs`, only one-sentence smoke tests confirmed that open-jev and
+  GLiNER2.5-Decide loaded. Earlier research screened out, without scoring: GLiClass (custom
+  decoding, no stock pipeline), fastino's GLiGuard-300M and Arch-Router-1.5B (no ONNX build, and a
+  different task), and GLiNER2.5-small (no ONNX build). kev-4b was not considered: its
+  2.3–2.5 GB download needs a capable GPU, which rules it out for an in-browser demo on
+  integrated graphics. No fine-tuned classifier was tried; every candidate was zero-shot, though
+  the cited cost studies suggest a fine-tuned DeBERTa or ModernBERT would be a strong baseline.
+  Staying zero-shot keeps labels editable in the browser with recalibration only, no retraining;
+  that rationale was stated after the selection, not argued at the time.
+- **Threshold-start fixes.** The spike's first analysis started the scan at 0.99 with only a
+  handful of tickets, so every model returned "no threshold". The ≥60-ticket floor was added
+  before any selection. The target-aware start (PR #14) leaves the 5% and 10% spike results
+  unchanged.
 
 ## Why typed decisions
 
