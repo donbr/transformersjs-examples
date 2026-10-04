@@ -7,14 +7,23 @@
 // runtime:     'wasm' | 'webgpu-preferred'
 // liveRuntime: the demo page shows the device it actually loaded, so the header shows no
 //              runtime pill for it (a static one would duplicate or contradict the page).
-// status:  'live' (has a route) | 'planned' (no route yet)
+// status:      'live' (has a route) | 'planned' (no route yet; homepage card only)
+// shortName:   name in the homepage metric captions
+// accent:      Tailwind top-border class for the homepage card (full literal, for JIT)
+// flagship:    shown as the homepage's full-width card (its details are /decide-specific,
+//              see HomePage.jsx and src/demos/decide/stats.js)
+// Planned entries have no modelName/modelId/runtime; they add `detail` (the mono line on
+// their card) and optionally `optional: true`. Code that reads model fields must use
+// liveDemos, not demos.
 export const demos = [
   {
     id: 'decide',
     name: 'Decide',
+    shortName: 'Decide',
+    flagship: true,
     description:
-      'Auto-route a support ticket only when a calibrated confidence threshold meets your error target; escalate the rest',
-    category: 'decisions',
+      "Paste a support ticket and get Auto-route or Escalate. A ticket is only routed automatically when the model's confidence clears a threshold certified for your error target.",
+    accent: 'border-blue-500',
     modelName: 'open-jev · DeBERTa-v3-large',
     modelId: 'onnx-community/open-jev-deberta-v3-large-ONNX',
     runtime: 'webgpu-preferred',
@@ -24,8 +33,9 @@ export const demos = [
   {
     id: 'cross-encoder',
     name: 'Cross Encoder',
-    description: 'Text similarity and relevance scoring',
-    category: 'classification',
+    shortName: 'Reranking',
+    description: 'Score how relevant each passage is to a query, then rank them. The planned /verify builds on it.',
+    accent: 'border-green-500',
     modelName: 'mxbai-rerank-xsmall-v1',
     modelId: 'mixedbread-ai/mxbai-rerank-xsmall-v1',
     runtime: 'wasm',
@@ -34,16 +44,48 @@ export const demos = [
   {
     id: 'zero-shot',
     name: 'Zero-Shot Classification',
-    description: 'Classify text without specific training',
-    category: 'classification',
+    shortName: 'Zero-shot',
+    description: 'Sort text into labels you define, with no training. Paste reviews and watch them land in sections.',
+    accent: 'border-green-500',
     modelName: 'deberta-v3-xsmall-zeroshot',
     modelId: 'MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33',
     runtime: 'wasm',
     status: 'live',
   },
+  {
+    id: 'verify',
+    name: 'Verify',
+    shortName: 'Verify',
+    description:
+      'Is this quote or citation actually supported by its source? Exact match first, then a small NLI model returns supports, contradicts or not mentioned.',
+    detail: '/verify · extends Cross Encoder',
+    accent: 'border-purple-500',
+    status: 'planned',
+  },
+  {
+    id: 'guard',
+    name: 'Guard',
+    shortName: 'Guard',
+    description:
+      'Offline prompt-injection and policy check for LLM inputs and outputs, with strict and permissive policies you can switch between.',
+    detail: '/guard · Llama Prompt Guard 2 (22M)',
+    accent: 'border-amber-500',
+    status: 'planned',
+  },
+  {
+    id: 'redact',
+    name: 'Redact',
+    shortName: 'Redact',
+    description: 'Strip PII on-device before text is sent to an LLM.',
+    detail: '/redact',
+    accent: 'border-pink-500',
+    status: 'planned',
+    optional: true,
+  },
 ];
 
 export const liveDemos = demos.filter((demo) => demo.status === 'live');
+export const plannedDemos = demos.filter((demo) => demo.status === 'planned');
 
 /** The live demo whose route matches a pathname such as "/decide", or undefined. */
 export function demoForPath(pathname) {

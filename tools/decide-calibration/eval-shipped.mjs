@@ -1,10 +1,12 @@
 // Data check: certify thresholds on the SHIPPED src/demos/decide/data/calibration.json and
 // evaluate them on data/test.json, the same way the /decide page does, at 3/5/10/15% targets.
 // Exits non-zero if the results differ from EXPECTED. After re-scoring, update EXPECTED
-// together with the numbers in docs/decide.md, CLAUDE.md, README.md and the PR text.
+// together with the numbers in docs/decide.md, CLAUDE.md, README.md and the PR text. The
+// homepage reads src/demos/decide/stats.js, whose HEADLINE is checked at the end.
 // usage: node tools/decide-calibration/eval-shipped.mjs
 import fs from "node:fs";
 import { certifyThreshold, evaluate } from "../../src/demos/decide/calibration.js";
+import { HEADLINE } from "../../src/demos/decide/stats.js";
 
 const read = (name) => JSON.parse(fs.readFileSync(new URL(`../../src/demos/decide/data/${name}`, import.meta.url)));
 const cal = read("calibration.json");
@@ -35,5 +37,16 @@ for (const [target, [thr, routed, err, leakNear, leakFar]] of Object.entries(EXP
   console.log(
     `${ok ? "ok  " : "FAIL"} ${String(target).padStart(2)}%  ${threshold?.toFixed(2) ?? "none"}  ${pct(ev.autoRateInScope)}     ${pct(ev.errorAmongActed)}     ${pct(ev.leakNear)}    ${pct(ev.leakFar)}  ${ev.acted}`,
   );
+}
+// The homepage's headline (src/demos/decide/stats.js) must match the shipped data.
+{
+  const threshold = certifyThreshold(cal.items, cal.keys, HEADLINE.target);
+  const ev = evaluate(test.items, test.keys, threshold);
+  const ok =
+    threshold === HEADLINE.threshold &&
+    near(ev.autoRateInScope, HEADLINE.routedInScope) &&
+    near(ev.errorAmongActed, HEADLINE.errorWhenActing);
+  if (!ok) fails++;
+  console.log(`${ok ? "ok  " : "FAIL"} homepage headline (stats.js): threshold ${HEADLINE.threshold}, ${pct(HEADLINE.routedInScope)} routed, ${pct(HEADLINE.errorWhenActing)} error`);
 }
 process.exit(fails ? 1 : 0);
