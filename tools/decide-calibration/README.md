@@ -2,7 +2,8 @@
 
 Everything needed to rebuild the data behind `/decide`
 (`src/demos/decide/data/calibration.json` and `test.json`), check it, and re-run the
-model comparison that chose open-jev. Background and lessons: [`docs/decide.md`](../../docs/decide.md).
+model comparison that chose open-jev. Background and lessons: [`docs/decide.md`](../../docs/decide.md);
+diagrams of the whole harness: [`docs/harness.md`](../../docs/harness.md).
 
 The shipped scores are valid for one exact setup: the labels and scope notes in
 `src/demos/decide/labels.js`, the question in `labels.js`/`question.js`, open-jev

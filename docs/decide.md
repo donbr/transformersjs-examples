@@ -7,7 +7,8 @@ the tab.
 
 This document records how the shipped numbers were produced, what was learned on the way, and
 what the page can and cannot claim. Rebuild and check the data with
-[`tools/decide-calibration/`](../tools/decide-calibration/README.md).
+[`tools/decide-calibration/`](../tools/decide-calibration/README.md). Diagrams of the harness, one
+ticket's path through the browser, and a proposed fine-tuning loop: [`docs/harness.md`](harness.md).
 
 ## How a decision is made
 
