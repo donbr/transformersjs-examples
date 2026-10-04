@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A single React + Vite SPA that hosts browser-side ML demos adapted from [huggingface/transformers.js-examples](https://github.com/huggingface/transformers.js-examples). All inference runs in the browser via `@huggingface/transformers` v4 (ONNX models fetched from the Hugging Face Hub at runtime); there is no backend.
 
-Live routes: `/decide` (support-ticket auto-route vs. escalate with a calibrated confidence threshold; open-jev / DeBERTa-v3-large via the `open-jev` package, ~357 MB q4f16, WebGPU-preferred with WASM fallback), `/zero-shot` (zero-shot classification) and `/cross-encoder` (reranking), both WASM. Planned, not yet built: `/verify` (citation support check, extends cross-encoder), `/guard` (prompt-injection check), optional `/redact` (PII redaction).
+Live routes: `/decide` (support-ticket auto-route vs. escalate with a calibrated confidence threshold; open-jev / DeBERTa-v3-large via the `open-jev` package, ~357 MB q4f16, WebGPU-preferred with WASM fallback), `/zero-shot` (zero-shot classification) and `/cross-encoder` (reranking), both WASM. Planned, not yet built: `/verify` (citation support check with an NLI model; reads pairs like cross-encoder but does not build on the reranker), `/guard` (prompt-injection check), optional `/redact` (PII redaction).
 
 ## Commands
 
