@@ -63,7 +63,8 @@ for (const [target, [thr, routed, err, leakNear, leakFar]] of Object.entries(EXP
 // The charts in docs/decide.md must match the shipped data: the Sankey's counts at the homepage
 // target, and every line of the two coverage/error charts (one decimal, as drawn).
 {
-  const doc = fs.readFileSync(new URL("../../docs/decide.md", import.meta.url), "utf8");
+  // Normalize CRLF so a Windows checkout parses the same as LF.
+  const doc = fs.readFileSync(new URL("../../docs/decide.md", import.meta.url), "utf8").replace(/\r\n/g, "\n");
   const blocks = [...doc.matchAll(/```mermaid\n([\s\S]*?)```/g)].map((m) => m[1]);
   const check = (name, ok, detail) => {
     if (!ok) fails++;
