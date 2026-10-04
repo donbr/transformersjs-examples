@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:facts": "node tools/decide-calibration/eval-shipped.mjs"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.0",
