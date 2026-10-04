@@ -4,7 +4,7 @@ Decision = argmax over 15 banking intents + "other". The system ACTS when the
 argmax is a banking intent and passes the gate; otherwise it ESCALATES.
 An action is an error if the intent is wrong, or if the message was out of scope.
 """
-import json, math, glob, statistics as st
+import json, math, glob, os, sys, statistics as st
 
 def binom_cdf(k, n, p):
     if p <= 0: return 1.0
@@ -31,18 +31,26 @@ def decide(item, keys):
 def acted_error(item, label):
     return item["group"] != "in_scope" or label != item["gold"]
 
-MIN_ACTED = 60  # 0 errors in 59 is the smallest sample whose 95% upper bound is <= 5%
+MIN_ACTED = 60  # floor on acted-on items before a threshold is tested
+
+def min_acted_for(alpha, conf=0.95):
+    """Smallest n whose zero-error 95% bound, 1 - (1 - conf)^(1/n), is <= alpha
+    (59 at 5%, 99 at 3%), floored at MIN_ACTED. Mirrors minActedFor in calibration.js."""
+    if not 0 < alpha < 1:
+        return math.inf
+    return max(MIN_ACTED, math.ceil(math.log(1 - conf) / math.log(1 - alpha)))
 
 def ltt_threshold(cal, keys, alpha, conf=0.95):
     """Fixed-sequence test from strict to loose; keep the loosest threshold whose
     upper bound on acted-error stays <= alpha (Learn-then-Test style).
-    The sequence starts at the first threshold acting on >= MIN_ACTED calibration
-    items; that start depends only on model scores, not labels, so the
-    fixed-sequence guarantee is preserved."""
+    The sequence starts at the first threshold acting on >= min_acted_for(alpha)
+    calibration items; that start depends only on the target and the model
+    scores, not labels, so the fixed-sequence guarantee is preserved."""
+    min_acted = min_acted_for(alpha, conf)
     chosen = None
     for lam in [x / 100 for x in range(99, 0, -1)]:
         acted = [(it, lab) for it in cal for lab, pm in [decide(it, keys)] if lab != "other" and pm >= lam]
-        if len(acted) < MIN_ACTED:
+        if len(acted) < min_acted:
             continue
         k = sum(acted_error(it, lab) for it, lab in acted)
         if cp_upper(k, len(acted), conf) <= alpha:
@@ -98,8 +106,21 @@ def ece(items, keys, bins=10):
         b[j][0] += 1; b[j][1] += pm; b[j][2] += lab == it["gold"]
     return sum(abs(c / n - a / n) * n for n, c, a in b if n) / len(items)
 
-report = {}
-for f in sorted(g for g in glob.glob("scores-*.json") if ".partial" not in g):
+# Inputs and output live next to this script, whatever the working directory.
+# scores-decide-* is score-browser.js output (a different format, no group/gold) and
+# .partial files are incomplete runs; neither belongs in the model comparison.
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPORT = os.path.join(HERE, "report.json")
+inputs = sorted(
+    g for g in glob.glob(os.path.join(HERE, "scores-*.json"))
+    if ".partial" not in g and not os.path.basename(g).startswith("scores-decide-")
+)
+if not inputs:
+    sys.exit(f"analyze.py: no spike score files (scores-*.json) in {HERE}; nothing to analyze")
+
+# Merge into the existing report so re-scoring one model keeps the other rows.
+report = json.load(open(REPORT)) if os.path.exists(REPORT) else {}
+for f in inputs:
     d = json.load(open(f))
     keys, cal, test = d["keys"], d["results"]["calibration"], d["results"]["test"]
     ins = [it for it in test if it["group"] == "in_scope"]
@@ -120,7 +141,7 @@ for f in sorted(g for g in glob.glob("scores-*.json") if ".partial" not in g):
         "latency_ms_p90": sorted(ms)[int(0.9 * len(ms))],
     }
 
-json.dump(report, open("report.json", "w"), indent=1)
+json.dump(report, open(REPORT, "w"), indent=1)
 pct = lambda x: "  -  " if x is None else f"{100 * x:5.1f}"
 print(f"{'model':16} {'in-top1':>7} {'ECE':>5} | raw: {'auto':>5} {'err':>5} {'FAnear':>6} {'FAfar':>5} | gate5: {'thr':>4} {'auto':>5} {'autoIn':>6} {'err':>5} {'FAnear':>6} {'FAfar':>5} | gate10: {'auto':>5} {'err':>5} | p50ms")
 for m, r in report.items():

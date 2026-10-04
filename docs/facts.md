@@ -15,7 +15,7 @@ the row when you re-measure.
 | Claim | Where | Source | How to re-check | Checked |
 |-------|-------|--------|-----------------|---------|
 | 68% of in-scope tickets auto-routed, 3.2% error, threshold 0.45 at ≤5% | Home flagship card, /decide Policy panel | Shipped `src/demos/decide/data/*.json` (`stats.js` `HEADLINE`) | `npm run check:facts` (automated) | 2026-10-04 |
-| Results at 3/10/15% targets (78.9% / 6.8%, 88.2% / 10.6%, leaks) | /decide Policy panel, `docs/decide.md` | Same data | `npm run check:facts` (automated) | 2026-10-04 |
+| Results at 2/3/4/10/15% targets (62.4% / 1.8%, 62.7% / 1.8%, 65.3% / 1.7%, 78.9% / 6.8%, 88.2% / 10.6%, leaks); none at 1% | /decide Policy panel, `docs/decide.md` | Same data | `npm run check:facts` (automated) | 2026-10-04 |
 | 357 MB download (q4f16, WebGPU); 487 MB on WASM (q4; also used on WebGPU without `shader-f16`) | Home flagship card, /decide load card | `OpenJev.info().downloadSize` seen in Chrome (WebGPU) and headless Chromium (WASM); consistent with the Hub (q4 weights 477 MB + graph + tokenizer) | Open /decide on each runtime; read the load card | 2026-10-03, measured once |
 | ~40 s first load (in our test) | Home flagship card | One cold load on one machine (Windows Chrome, Intel Iris Xe) on the PR #4 preview: 36 s download + 4 s warm-up; connection speed not measured | Clear site data, open /decide, time to Ready | 2026-10-03, measured once |
 | ~0.4 s per ticket on WebGPU | Home flagship card | 406–440 ms per decision on the preview; scoring run p50 364 ms (`provenance.json`) | Decide a few tickets on /decide | 2026-10-03, WebGPU only |

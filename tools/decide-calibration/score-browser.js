@@ -25,7 +25,12 @@ async function main() {
   const firstCallMs = performance.now() - tw;
   const meta = { ...jev.runtime, cachedAtStart: info.isCached, downloadSize: info.downloadSize, loadMs, firstCallMs, userAgent: navigator.userAgent };
   const out = { meta, keys: DEFAULT_LABELS.map((l) => l.key), calibration: [], test: [] };
-  const save = (complete) => fetch(`./save?name=scores-${tag}${complete ? "" : ".partial"}.json`, { method: "POST", body: JSON.stringify({ ...out, complete }) });
+  // A failed POST /save must stop the run: a missing file is easy to miss, a thrown error is not.
+  const save = async (complete) => {
+    const res = await fetch(`./save?name=scores-${tag}${complete ? "" : ".partial"}.json`, { method: "POST", body: JSON.stringify({ ...out, complete }) });
+    if (!res.ok) throw new Error(`save failed: HTTP ${res.status}`);
+    return res;
+  };
   for (const name of ["calibration", "test"]) {
     for (const [i, item] of split[name].entries()) {
       const s = performance.now();

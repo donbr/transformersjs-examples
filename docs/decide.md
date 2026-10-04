@@ -19,9 +19,10 @@ what the page can and cannot claim. Rebuild and check the data with
    scope.
 3. The threshold is the loosest value, scanned from 0.99 down in 0.01 steps, whose one-sided
    Clopper-Pearson 95% upper bound on acted-on error stays within the target (fixed-sequence
-   testing, as in Learn-then-Test). The scan starts at the first threshold that acts on at least
-   60 calibration tickets. That start depends only on the scores, never on the labels, so the
-   guarantee is kept. Code: `src/demos/decide/calibration.js`; Python twin:
+   testing, as in Learn-then-Test). The scan starts at the first threshold that acts on enough
+   calibration tickets for the target to be reachable at all: the smallest n with
+   1 − 0.05^(1/n) ≤ target (59 at 5%, 99 at 3%), and never fewer than 60. That start depends
+   only on the target and the scores, never on the labels, so the guarantee is kept. Code: `src/demos/decide/calibration.js`; Python twin:
    `tools/decide-calibration/analyze.py`. They agree on every spike score file
    (`parity.mjs`).
 
@@ -35,9 +36,15 @@ out-of-scope ("another team's queue"), and CLINC's `oos` rows are far out-of-sco
 |-------|--------|------|----------|
 | Dev | CLINC validation | 300 banking + 150 credit + 100 oos | Writing label scope notes (from confident errors) |
 | Calibration | CLINC train, seed 20261004 | 20 per banking intent (300) + 10 per credit intent (150) + 100 oos | Choosing the threshold |
-| Test | CLINC test | 450 banking + 150 credit + 150 oos | Reporting results only |
+| Test | CLINC test | 450 banking + 150 credit + 150 oos | Reporting results; also used by the spike to compare models |
 
-The three splits share no text. Scores were computed in Chrome 154 (Windows) with q4f16 on
+The three splits share no text. The test split is not pristine, though: the spike compared eight
+model and label-note setups on these same 750 tickets and chose open-jev with notes partly on
+that basis, so the test numbers below are mildly optimistic as estimates for new traffic. The
+95% guarantee is computed on the calibration split only and is unaffected. The two mixes also
+differ: calibration is 300 in-scope / 150 credit-card / 100 off-topic (55/27/18%), test is
+450/150/150 (60/20/20%). The bound covers acted-on error under the calibration mix; a queue
+with more out-of-scope traffic can see a higher error rate. Scores were computed in Chrome 154 (Windows) with q4f16 on
 WebGPU (`tools/decide-calibration/provenance.json`): 357 MB download, 0.8 s first call (model and GPU shader cache already warm; about 4 s cold),
 364 ms p50 / 373 ms p90 per ticket.
 
@@ -45,12 +52,16 @@ WebGPU (`tools/decide-calibration/provenance.json`): 357 MB download, 0.8 s firs
 
 | Error target | Threshold | In-scope routed | Error when acting | Credit-card routed | Off-topic routed |
 |--------------|-----------|-----------------|-------------------|--------------------|------------------|
-| ≤3% | none: escalate everything | 0% | – | 0% | 0% |
+| ≤1% | none: escalate everything | 0% | – | 0% | 0% |
+| ≤2% | 0.52 | 62.4% | 1.8% | 0.7% | 0.7% |
+| ≤3% | 0.51 | 62.7% | 1.8% | 0.7% | 0.7% |
+| ≤4% | 0.48 | 65.3% | 1.7% | 0.7% | 0.7% |
 | ≤5% (default) | 0.45 | 68.0% | 3.2% | 3.3% | 0.7% |
 | ≤10% | 0.38 | 78.9% | 6.8% | 7.3% | 0.7% |
 | ≤15% | 0.32 | 88.2% | 10.6% | 18.0% | 1.3% |
 
-Error when acting stayed under the target at every certified threshold. There is one split per
+Error when acting stayed under the target at every certified threshold. At ≤1% no threshold
+qualifies: it would need at least 299 acted-on calibration tickets with no errors. There is one split per
 condition and no repeated runs, so differences of a few points are within sampling noise.
 `node tools/decide-calibration/eval-shipped.mjs` re-derives this table from the shipped files.
 
@@ -59,7 +70,8 @@ condition and no repeated runs, so differences of a few points are within sampli
 These affect correctness; read them before changing labels, models or data.
 
 1. **The guarantee only holds if the splits stay separate.** Write label notes from a dev split,
-   choose the threshold on a separate calibration split, report from an untouched test split.
+   choose the threshold on a separate calibration split, and report from a test split that played
+   no part in any choice (this repo's test split falls short of that; see Data).
    The spike broke this once: its scope notes were written from confusions on CLINC
    validation, and its "+desc" threshold was then certified on that same set. Test error
    happened to stay under target, but the 95% guarantee was not valid. The clean split restores
@@ -78,11 +90,17 @@ These affect correctness; read them before changing labels, models or data.
    label text, scope notes, question, dtype and device. Any change means re-scoring. q4 (CPU)
    and q4f16 (WebGPU) disagree on the top label for 10 of 750 spike test items (1.3%; max
    per-label probability difference 0.044).
-3. **The threshold search needs a minimum sample.** Starting the scan where at least 60
-   calibration items are acted on is load-bearing: 0 errors in 59 is the smallest sample whose
-   95% upper bound is ≤5% (CP(0,59) = 4.95%, CP(0,58) = 5.03%). Without that floor the strictest
-   thresholds act on a handful of items, fail the bound, and stop the scan, so every model came
-   back "no safe threshold".
+3. **The threshold search needs a minimum sample, sized to the target.** A threshold is only
+   tested once it acts on at least n calibration items, where n is the smallest sample whose
+   zero-error 95% bound meets the target, 1 − 0.05^(1/n) ≤ target: 59 at 5% (CP(0,59) = 4.95%,
+   CP(0,58) = 5.03%), 74 at 4%, 99 at 3%, 149 at 2%, 299 at 1%, never fewer than 60. Start too
+   small and the strictest thresholds act on a handful of items, fail the bound and stop the
+   scan: with no floor, every spike model came back "no safe threshold". A fixed floor of 60
+   had the opposite flaw: 0 errors in 60 only bounds 4.87%, so every target below ~4.9% failed
+   its first test and the page reported no threshold at ≤2–4% even though 0.52, 0.51 and 0.48
+   qualify (caught in review, fixed 2026-10-04). The start depends only on the target and the
+   scores, not the labels, so the guarantee holds. It also sizes the calibration set: ≤1% here
+   would need at least 299 acted-on tickets with zero errors.
 4. **Label scope notes are the biggest lever.** At the ≤5% target on the spike split, notes took
    GLiNER2.5-Decide from 0% to 18.5% of all tickets routed and open-jev from 14.1% to 38.9%:
    more than switching models did. Write them from confident errors on the dev split, never

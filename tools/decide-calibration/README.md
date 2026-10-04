@@ -41,7 +41,10 @@ Expected for the shipped labels:
 
 | Target | Threshold | Test in-scope routed | Error when acting | Near-OOS leak | Far-OOS leak |
 |--------|-----------|----------------------|-------------------|---------------|--------------|
-| ≤3% | none (escalate all) | 0% | – | 0% | 0% |
+| ≤1% | none (escalate all) | 0% | – | 0% | 0% |
+| ≤2% | 0.52 | 62.4% | 1.8% | 0.7% | 0.7% |
+| ≤3% | 0.51 | 62.7% | 1.8% | 0.7% | 0.7% |
+| ≤4% | 0.48 | 65.3% | 1.7% | 0.7% | 0.7% |
 | ≤5% | 0.45 | 68.0% | 3.2% | 3.3% | 0.7% |
 | ≤10% | 0.38 | 78.9% | 6.8% | 7.3% | 0.7% |
 | ≤15% | 0.32 | 88.2% | 10.6% | 18.0% | 1.3% |
@@ -75,10 +78,10 @@ Expected for the shipped labels:
    ```bash
    python3 make_data.py . ../../src/demos/decide/data
    ```
-6. **Check it:** run `node tools/decide-calibration/eval-shipped.mjs`, then update its
-   `EXPECTED` table, `HEADLINE` in `src/demos/decide/stats.js` (the homepage card; also checked by
-   this script) and the same numbers in `docs/decide.md`, `CLAUDE.md`, `README.md` and the PR
-   text.
+6. **Check it:** run `node tools/decide-calibration/eval-shipped.mjs`, then update these
+   together: its `EXPECTED` table, `HEADLINE` in `src/demos/decide/stats.js` (the homepage card;
+   also checked by this script), the results table and lessons in `docs/decide.md`, the Expected
+   table above, the /decide rows in `docs/facts.md`, and the PR text.
 7. **Check the app:** `npm run build`, then on `/decide` load the model, decide a sample ticket,
    move the error-target slider, and use Edit → Reset.
 
@@ -120,10 +123,10 @@ OPEN_JEV=./open-jev-pr.mjs node score.mjs gliner2-decide q4 desc
 
 1. Replace `BANKING`/`CREDIT` in `build_split.py` (or load your own labeled tickets) with three
    disjoint sets: **dev** (write label text and scope notes from its errors), **calibration**
-   (a few hundred tickets; the threshold search needs at least 60 acted-on items. Small
-   calibration sets cannot certify tight targets: with 550 tickets here, ≤3% had no certifiable
-   threshold. Plan the calibration size from the target, e.g. 0 errors in 59 acted-on tickets is
-   the minimum for ≤5%), and **test**
+   (a few hundred tickets; a threshold is only tested once it acts on max(60, n) items, where
+   n is the smallest sample whose zero-error bound meets the target: 59 at 5%, 99 at 3%, 299 at
+   1%. Small calibration sets cannot certify tight targets: with 550 tickets here, ≤1% has no
+   certifiable threshold. Plan the calibration size from the target), and **test**
    (report numbers only from this).
 2. Write the labels in `src/demos/decide/labels.js` (keep a catch-all `other` label with an
    explicit scope note) and follow the regeneration steps above.
