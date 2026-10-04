@@ -268,8 +268,9 @@ function App() {
   const requestId = useRef(0);
   const runId = useRef(0);
   const currentKey = labelsKey(labels);
-  const currentLabelsKey = useRef(currentKey);
-  currentLabelsKey.current = currentKey;
+  // Label key of the in-flight decide request, captured when it is sent: the reply's
+  // probabilities belong to those labels even if the labels change before it arrives.
+  const pendingLabelsKey = useRef(null);
   const pendingCalibrationKey = useRef(null);
 
   useEffect(() => {
@@ -292,9 +293,10 @@ function App() {
           setStatus("ready");
           break;
         case "decision":
-          // Ignore answers to tickets that were superseded or whose labels changed.
+          // Ignore answers to superseded requests; tag the result with the labels it was
+          // scored under, so showResult hides it once the labels differ.
           if (msg.id === requestId.current) {
-            setResult({ probs: msg.probs, ms: msg.ms, labelsKey: currentLabelsKey.current });
+            setResult({ probs: msg.probs, ms: msg.ms, labelsKey: pendingLabelsKey.current });
             setStatus("ready");
           }
           break;
@@ -382,8 +384,9 @@ function App() {
     setError(null);
     setStatus("deciding");
     requestId.current += 1;
+    pendingLabelsKey.current = currentKey;
     worker.current.postMessage({ type: "decide", id: requestId.current, text: ticket.trim(), labels });
-  }, [canDecide, ticket, labels]);
+  }, [canDecide, ticket, labels, currentKey]);
 
   const retryLoad = () => {
     setError(null);
@@ -599,7 +602,8 @@ function App() {
             draft={draft}
             setDraft={setDraft}
             edited={currentKey !== DEFAULT_KEY}
-            disabled={!!calibrating}
+            // No label edits while a decision or recalibration is running.
+            disabled={!!calibrating || status === "deciding"}
             onEdit={() => {
               setDraft(labels);
               setEditing(true);
