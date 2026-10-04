@@ -106,6 +106,8 @@ function App() {
   const run = useCallback(() => {
     if (!canRank) return;
     setError(null);
+    // Clear the old ranking: if this run fails, nothing stale is left on screen.
+    setResults([]);
     setStatus("processing");
     worker.current.postMessage({ query: query.trim(), documents: passages.join("\n") });
   }, [canRank, query, passages]);
@@ -169,12 +171,13 @@ function App() {
             <input
               id="query"
               value={query}
+              readOnly={busy}
               onChange={(e) => {
                 setQuery(e.target.value);
                 setSample(null);
                 setResults([]);
               }}
-              className="px-3 py-2.5 border border-gray-300 rounded-md"
+              className="px-3 py-2.5 border border-gray-300 rounded-md read-only:bg-gray-50 read-only:text-gray-500"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -190,12 +193,13 @@ function App() {
               id="passages"
               rows={10}
               value={documents}
+              readOnly={busy}
               onChange={(e) => {
                 setDocuments(e.target.value);
                 setSample(null);
                 setResults([]);
               }}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-md resize-y text-sm"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-md resize-y text-sm read-only:bg-gray-50 read-only:text-gray-500"
             />
           </div>
           <div>
