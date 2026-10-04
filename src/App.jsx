@@ -10,14 +10,15 @@ const ZeroShotDemo = React.lazy(() => import('./demos/zero-shot/App'));
 const DecideDemo = React.lazy(() => import('./demos/decide/App'));
 
 function App() {
-  // The homepage draws full-width bands and its own footer; demos keep the padded container.
+  // The homepage draws full-width bands and its own footer; demos sit in a max-w-6xl column
+  // that lines up with the header.
   // Only the wrapper's className changes between routes, never the element, so nothing remounts.
   const isHome = useLocation().pathname === '/';
   // Routes and lazy imports stay fixed here (demo metadata lives in demos/registry.js), so
   // header state such as the mobile menu can never re-key or remount a demo and its worker.
   return (
     <Layout header={<SiteHeader />}>
-      <div className={isHome ? 'min-h-full flex flex-col' : 'container mx-auto p-4 h-full'}>
+      <div className={isHome ? 'min-h-full flex flex-col' : 'max-w-6xl mx-auto px-4 py-6 h-full'}>
         <React.Suspense fallback={
           <div className="flex justify-center items-center h-full">
             <div className="text-center">

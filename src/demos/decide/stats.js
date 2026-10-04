@@ -15,6 +15,6 @@ export const HEADLINE = {
 export const RUNTIME = {
   downloadWebGPU: '357 MB', // q4f16
   downloadWasm: '487 MB', // q4
-  firstLoad: '~40 s', // one cold load on a fast connection (download + warm-up)
+  firstLoad: '~40 s', // one cold load on one test machine and connection (download + warm-up)
   perTicket: '~0.4 s', // WebGPU, q4f16
 };

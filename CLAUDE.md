@@ -16,9 +16,12 @@ npm run dev       # Vite dev server
 npm run build     # production build to dist/
 npm run preview   # serve dist/ locally
 npm run lint      # eslint . — NOTE: no eslint.config.js is committed, so ESLint 9 fails until one is added
+npm run check:facts  # asserts the shipped /decide numbers (see docs/facts.md)
 ```
 
 There is no test suite. Verify changes by running the dev server and exercising each route in Chrome: the demo returns output, and leaving the route terminates its worker.
+
+Facts shown on the site (numbers, model and cost claims) are listed in `docs/facts.md` with their source and how to re-check them; add a row when a page gains a claim, and run `npm run check:facts` (asserts the shipped /decide numbers). Prototype stance: one quick check per claim, not proof.
 
 ## Architecture
 
