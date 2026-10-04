@@ -57,7 +57,7 @@ function LoadCard({ load }) {
         ))}
       </ol>
       <div className="flex justify-between items-baseline gap-3">
-        <span className="text-lg font-semibold">
+        <span className="text-lg font-semibold min-w-0 flex-1">
           {warming
             ? "Warming up"
             : load.total == null
@@ -67,7 +67,7 @@ function LoadCard({ load }) {
                 : "Downloading model"}
         </span>
         {!warming && load.total != null && (
-          <span className="font-mono text-sm text-gray-600">
+          <span className="font-mono text-sm text-gray-600 whitespace-nowrap">
             {MB(load.loaded)} / {MB(load.total)} MB
           </span>
         )}
@@ -186,11 +186,11 @@ function LabelsCard({ labels, editing, draft, setDraft, onEdit, onSave, onCancel
         {!editing && (
           <div className="flex gap-2">
             {edited && (
-              <button type="button" onClick={onReset} disabled={disabled} className="text-sm px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+              <button type="button" onClick={onReset} disabled={disabled} className="text-sm px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
                 Reset
               </button>
             )}
-            <button type="button" onClick={onEdit} disabled={disabled} className="text-sm px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+            <button type="button" onClick={onEdit} disabled={disabled} className="text-sm px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
               Edit
             </button>
           </div>
@@ -213,7 +213,7 @@ function LabelsCard({ labels, editing, draft, setDraft, onEdit, onSave, onCancel
                   value={l.text}
                   disabled={l.key === ESCAPE_KEY}
                   onChange={(e) => setDraft(draft.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
-                  className="font-semibold border border-gray-300 rounded px-2 py-1 disabled:bg-gray-50"
+                  className="font-semibold border border-gray-300 rounded-md px-2 py-1 disabled:bg-gray-50"
                 />
                 <label className="sr-only" htmlFor={`note-${l.key}`}>Scope note for label {i + 1}</label>
                 <input
@@ -221,15 +221,15 @@ function LabelsCard({ labels, editing, draft, setDraft, onEdit, onSave, onCancel
                   value={l.description}
                   placeholder="Scope note (optional)"
                   onChange={(e) => setDraft(draft.map((x, j) => (j === i ? { ...x, description: e.target.value } : x)))}
-                  className="text-sm border border-gray-200 rounded px-2 py-1 text-gray-700"
+                  className="text-sm border border-gray-200 rounded-md px-2 py-1 text-gray-700"
                 />
               </li>
             ))}
           </ul>
           {invalid && <p className="text-sm text-red-600">Every label needs a unique, non-empty name.</p>}
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={onCancel} className="text-sm px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={invalid} className="text-sm px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400">Save labels</button>
+            <button type="button" onClick={onCancel} className="text-sm px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">Cancel</button>
+            <button type="submit" disabled={invalid} className="text-sm px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-500 disabled:bg-gray-400">Save labels</button>
           </div>
         </form>
       ) : (
@@ -413,9 +413,8 @@ function App() {
   const showResult = result && result.labelsKey === currentKey;
 
   return (
-    <div className="demo-container">
-      <div className="demo-scroll-area p-2 md:p-4">
-        <div className="max-w-6xl w-full mx-auto flex flex-col gap-5">
+    // App.jsx's demo wrapper provides the max-w-6xl column and the page scroll.
+    <div className="flex flex-col gap-5 pb-10">
           <header className="flex flex-wrap justify-between items-end gap-3">
             <div className="max-w-2xl">
               <h1 className="text-3xl font-bold mb-1">Decide</h1>
@@ -446,7 +445,7 @@ function App() {
                     <button
                       type="button"
                       onClick={retryLoad}
-                      className="text-sm font-medium px-4 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                      className="text-sm font-medium px-4 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-500"
                     >
                       Try again
                     </button>
@@ -499,7 +498,7 @@ function App() {
                     type="button"
                     onClick={runDecide}
                     disabled={!canDecide}
-                    className="font-medium px-6 py-2.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
+                    className="font-medium px-6 py-2.5 rounded-md bg-blue-600 text-white hover:bg-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
                   >
                     {status === "deciding" ? "Deciding…" : status === "failed" ? "Unavailable" : "Decide"}
                   </button>
@@ -542,7 +541,7 @@ function App() {
                       type="button"
                       onClick={recalibrate}
                       disabled={!ready || !!calibrating}
-                      className="font-medium px-4 py-2.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
+                      className="font-medium px-4 py-2.5 rounded-md bg-blue-600 text-white hover:bg-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
                     >
                       {calibrating ? `Recalibrating… ${calibrating.done} / ${calibrating.total}` : "Recalibrate"}
                     </button>
@@ -616,8 +615,6 @@ function App() {
 
           {/* A sibling of the tool, not a wrapper: toggling it must not remount the worker. */}
           <WhyTypedDecisions target={target} threshold={threshold} testStats={stale ? null : testStats} />
-        </div>
-      </div>
     </div>
   );
 }

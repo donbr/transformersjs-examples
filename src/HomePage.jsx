@@ -88,7 +88,7 @@ function DecideFlagshipCard({ demo }) {
         </div>
         <span className="font-medium text-blue-600 mt-1">Open tool →</span>
       </div>
-      <div className="flex-[1_1_18rem] min-w-0 flex flex-col gap-1.5 bg-gray-50 border border-gray-200 rounded-lg p-5">
+      <div className="flex-[1_1_20rem] min-w-0 flex flex-col gap-1.5 bg-gray-50 border border-gray-200 rounded-lg p-5">
         <span className="text-sm font-semibold text-gray-600">Held-out test</span>
         <span className="text-4xl font-bold text-blue-600 leading-tight">{pct(HEADLINE.routedInScope, 0)}</span>
         <span className="text-gray-700">
