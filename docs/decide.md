@@ -71,6 +71,7 @@ this table and the charts below from the shipped files.
 **Where the 750 test tickets go at the default ≤5% target (threshold 0.45).**
 
 ```mermaid
+%%{init: {"sankey": {"linkColor": "source"}, "themeCSS": ".link { mix-blend-mode: normal !important; stroke-opacity: 0.5 !important; }"}}%%
 sankey-beta
 In-scope,Routed,306
 In-scope,Escalated to a person,144
@@ -114,7 +115,8 @@ xychart-beta
 
 *Slate: the target itself. Red: error when acting, which stays below the slate line at every
 target. Orange: share of the 150 credit-card questions routed. Purple: share of the 150 off-topic
-messages routed. Orange and purple overlap at 0.7% from ≤2% to ≤4%. Same uneven x-axis spacing as
+messages routed. Orange and purple overlap at 0.7% from ≤2% to ≤4%, and red and orange nearly
+coincide at ≤5% (3.2% vs 3.3%). Same uneven x-axis spacing as
 above; the guarantee covers the red line only, not the leak lines.*
 
 ## Lessons
