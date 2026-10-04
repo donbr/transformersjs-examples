@@ -84,12 +84,16 @@ for (const [target, [thr, routed, err, leakNear, leakFar]] of Object.entries(EXP
     }
   }
   const got = {};
+  const dupes = [];
   for (const line of (sankey ?? "").split("\n")) {
     const m = line.trim().match(/^(.+),(.+),(\d+)$/);
-    if (m) got[`${m[1]},${m[2]}`] = Number(m[3]);
+    if (!m) continue;
+    const key = `${m[1]},${m[2]}`;
+    if (key in got) dupes.push(`${key} drawn twice`); // a second copy would draw a second link
+    got[key] = Number(m[3]);
   }
   const keys = [...new Set([...Object.keys(want), ...Object.keys(got)])];
-  const bad = keys.filter((k) => want[k] !== got[k]).map((k) => `${k} chart ${got[k]} data ${want[k]}`);
+  const bad = [...dupes, ...keys.filter((k) => want[k] !== got[k]).map((k) => `${k} chart ${got[k]} data ${want[k]}`)];
   check("Sankey counts", Boolean(sankey) && bad.length === 0, sankey ? bad.join("; ") : "no sankey-beta block");
 
   // Line charts: x-axis targets and each series, rounded to one decimal as drawn.
