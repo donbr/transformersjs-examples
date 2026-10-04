@@ -1,6 +1,7 @@
 // Data check: certify thresholds on the SHIPPED src/demos/decide/data/calibration.json and
 // evaluate them on data/test.json, the same way the /decide page does, at 1/2/3/4/5/10/15% targets.
-// Exits non-zero if the results differ from EXPECTED. After re-scoring, update these together:
+// Exits non-zero if the results differ from EXPECTED, if HEADLINE differs from the data, or if the
+// chart data in docs/decide.md differ from it. After re-scoring, update these together:
 // EXPECTED here, HEADLINE in src/demos/decide/stats.js (homepage card, checked at the end), the
 // results table, charts and lessons in docs/decide.md (the charts are checked below), the Expected table in
 // tools/decide-calibration/README.md, the /decide rows in docs/facts.md, and the PR text.

@@ -65,8 +65,9 @@ Error when acting stayed under the target at every certified threshold. At ≤1%
 qualifies, and it fails on errors, not sample size: the calibration split can act on up to 500
 tickets, but the first threshold acting on 299 or more is 0.31, where 40 of 305 routed tickets are
 wrong (bound 16.7%). There is one split per condition and no repeated runs, so differences of a
-few points are within sampling noise. `node tools/decide-calibration/eval-shipped.mjs` re-derives
-this table and the charts below from the shipped files.
+few points are within sampling noise. `node tools/decide-calibration/eval-shipped.mjs` recomputes
+these results from the shipped files and checks the chart data below against them; it does not
+read this table or the chart captions.
 
 **Where the 750 test tickets go at the default ≤5% target (threshold 0.45).**
 
