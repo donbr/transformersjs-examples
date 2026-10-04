@@ -1,7 +1,8 @@
 // Data check: certify thresholds on the SHIPPED src/demos/decide/data/calibration.json and
 // evaluate them on data/test.json, the same way the /decide page does, at 3/5/10/15% targets.
 // Exits non-zero if the results differ from EXPECTED. After re-scoring, update EXPECTED
-// together with the numbers in docs/decide.md, CLAUDE.md, README.md and the PR text.
+// together with the numbers in docs/decide.md, CLAUDE.md, README.md, the homepage's
+// DECIDE_STATS (src/HomePage.jsx) and the PR text.
 // usage: node tools/decide-calibration/eval-shipped.mjs
 import fs from "node:fs";
 import { certifyThreshold, evaluate } from "../../src/demos/decide/calibration.js";
