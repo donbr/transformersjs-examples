@@ -171,7 +171,8 @@ This account is from that session's record.
 
 - **Deciding number:** coverage at a certified ≤5% target, measured on the 750 test tickets:
   open-jev with notes routed 38.9% at 1.7% error, GLiNER2.5-Decide with notes 18.5% at 2.2%,
-  and the NLI models had no qualifying threshold. In-scope top-1 was nearly tied (93.6% vs 93.1%
+  and the NLI models and GLiNER2.5-Decide without notes had no qualifying threshold: the notes,
+  more than the model, unlocked coverage. In-scope top-1 was nearly tied (93.6% vs 93.1%
   without notes) and played no part; ECE was set aside because both large encoders were
   underconfident (lesson 6). Validation numbers were not used to choose between models.
 - **Tie-breakers, not weighted formally:** open-jev ships in the published `open-jev` npm
