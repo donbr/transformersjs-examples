@@ -82,7 +82,7 @@ function DecideFlagshipCard({ demo }) {
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Icon paths={ICONS.clock} />
-            {RUNTIME.firstLoad} first load on a fast connection, then {RUNTIME.perTicket} per ticket on WebGPU
+            {RUNTIME.firstLoad} first load in our test, then {RUNTIME.perTicket} per ticket on WebGPU
           </span>
           <span className="font-medium text-blue-800">WebGPU preferred · falls back to WASM</span>
         </div>

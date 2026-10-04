@@ -409,10 +409,12 @@ function App() {
             <h3 className="text-lg font-semibold text-gray-800">Not a router</h3>
             <p>
               The scores aren&apos;t calibrated, so a cutoff doesn&apos;t tell you how often placed items are wrong. In
-              the comparison behind Decide (CLINC150 banking tickets, single-label mode and a different prompt from this
-              page), this model picked the right label for 72% of in-scope tickets, but acting on its top label for
-              every ticket would have been wrong 53% of the time once out-of-scope tickets were counted. Decide adds a
-              certified threshold and an escalate path for exactly that reason.
+              our banking-ticket test (a different task from this page: single-label, with a &ldquo;something
+              else&rdquo; option), the same model picked the right intent for 72% of in-scope tickets. But routing every
+              ticket whose top label wasn&apos;t &ldquo;something else&rdquo; would have been wrong 53% of the time once
+              credit-card and off-topic tickets were counted: it routed 90% of credit-card questions and 77% of
+              off-topic ones as banking requests. Decide adds a certified threshold and an escalate path for exactly
+              that reason.
             </p>
           </section>
         </div>
