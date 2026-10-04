@@ -101,7 +101,8 @@ for (const [target, [thr, routed, err, leakNear, leakFar]] of Object.entries(EXP
   const series = (b) => [...b.matchAll(/^\s*line \[([^\]]*)\]/gm)].map((m) => m[1].split(",").map(Number));
   const targets = (b) => [...(b.match(/x-axis[^\[]*\[([^\]]*)\]/)?.[1] ?? "").matchAll(/(\d+)%/g)].map((m) => Number(m[1]));
   const at = (t) => evaluate(test.items, test.keys, certifyThreshold(cal.items, cal.keys, t / 100));
-  const r1 = (x) => Math.round(x * 1000) / 10;
+  // null (no certified threshold, e.g. at ≤1%) becomes NaN, so no drawn value can match it.
+  const r1 = (x) => (x == null ? NaN : Math.round(x * 1000) / 10);
   const same = (a, b) => a.length === b.length && a.every((x, i) => Math.abs(x - b[i]) < 1e-9);
   const expectChart = (title, build) => {
     const b = charts.find((c) => c.includes(title));
