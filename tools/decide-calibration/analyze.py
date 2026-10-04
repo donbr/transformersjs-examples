@@ -4,7 +4,7 @@ Decision = argmax over 15 banking intents + "other". The system ACTS when the
 argmax is a banking intent and passes the gate; otherwise it ESCALATES.
 An action is an error if the intent is wrong, or if the message was out of scope.
 """
-import json, math, glob, statistics as st
+import json, math, glob, os, sys, statistics as st
 
 def binom_cdf(k, n, p):
     if p <= 0: return 1.0
@@ -106,8 +106,21 @@ def ece(items, keys, bins=10):
         b[j][0] += 1; b[j][1] += pm; b[j][2] += lab == it["gold"]
     return sum(abs(c / n - a / n) * n for n, c, a in b if n) / len(items)
 
-report = {}
-for f in sorted(g for g in glob.glob("scores-*.json") if ".partial" not in g):
+# Inputs and output live next to this script, whatever the working directory.
+# scores-decide-* is score-browser.js output (a different format, no group/gold) and
+# .partial files are incomplete runs; neither belongs in the model comparison.
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPORT = os.path.join(HERE, "report.json")
+inputs = sorted(
+    g for g in glob.glob(os.path.join(HERE, "scores-*.json"))
+    if ".partial" not in g and not os.path.basename(g).startswith("scores-decide-")
+)
+if not inputs:
+    sys.exit(f"analyze.py: no spike score files (scores-*.json) in {HERE}; nothing to analyze")
+
+# Merge into the existing report so re-scoring one model keeps the other rows.
+report = json.load(open(REPORT)) if os.path.exists(REPORT) else {}
+for f in inputs:
     d = json.load(open(f))
     keys, cal, test = d["keys"], d["results"]["calibration"], d["results"]["test"]
     ins = [it for it in test if it["group"] == "in_scope"]
@@ -128,7 +141,7 @@ for f in sorted(g for g in glob.glob("scores-*.json") if ".partial" not in g):
         "latency_ms_p90": sorted(ms)[int(0.9 * len(ms))],
     }
 
-json.dump(report, open("report.json", "w"), indent=1)
+json.dump(report, open(REPORT, "w"), indent=1)
 pct = lambda x: "  -  " if x is None else f"{100 * x:5.1f}"
 print(f"{'model':16} {'in-top1':>7} {'ECE':>5} | raw: {'auto':>5} {'err':>5} {'FAnear':>6} {'FAfar':>5} | gate5: {'thr':>4} {'auto':>5} {'autoIn':>6} {'err':>5} {'FAnear':>6} {'FAfar':>5} | gate10: {'auto':>5} {'err':>5} | p50ms")
 for m, r in report.items():

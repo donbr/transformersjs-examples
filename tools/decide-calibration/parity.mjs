@@ -4,11 +4,26 @@
 // (that is eval-shipped.mjs).
 import fs from "node:fs";
 import { certifyThreshold, evaluate, clopperPearsonUpper } from "../../src/demos/decide/calibration.js";
-const report = JSON.parse(fs.readFileSync("report.json"));
+// Inputs live next to this script, whatever the working directory. scores-decide-* is
+// score-browser.js output (no group/gold) and is not part of the comparison.
+const HERE = new URL("./", import.meta.url);
+const report = JSON.parse(fs.readFileSync(new URL("report.json", HERE)));
+const inputs = fs
+  .readdirSync(HERE)
+  .filter((f) => /^scores-.*\.json$/.test(f) && !f.includes(".partial") && !f.startsWith("scores-decide-"));
 let fails = 0;
-for (const f of fs.readdirSync(".").filter((f) => /^scores-.*\.json$/.test(f) && !f.includes(".partial"))) {
-  const d = JSON.parse(fs.readFileSync(f));
+if (inputs.length === 0) {
+  console.log(`FAIL no spike score files (scores-*.json) in ${HERE.pathname}; nothing was compared`);
+  fails++;
+}
+for (const f of inputs) {
+  const d = JSON.parse(fs.readFileSync(new URL(f, HERE)));
   const py = report[d.which];
+  if (!py) {
+    console.log(`FAIL ${f}: no "${d.which}" entry in report.json (run analyze.py first)`);
+    fails++;
+    continue;
+  }
   for (const [key, target] of [["gate_5pct", 0.05], ["gate_10pct", 0.10]]) {
     const thr = certifyThreshold(d.results.calibration, d.keys, target);
     const ev = evaluate(d.results.test, d.keys, thr);

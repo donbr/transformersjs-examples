@@ -78,10 +78,10 @@ Expected for the shipped labels:
    ```bash
    python3 make_data.py . ../../src/demos/decide/data
    ```
-6. **Check it:** run `node tools/decide-calibration/eval-shipped.mjs`, then update its
-   `EXPECTED` table, `HEADLINE` in `src/demos/decide/stats.js` (the homepage card; also checked by
-   this script) and the same numbers in `docs/decide.md`, `CLAUDE.md`, `README.md` and the PR
-   text.
+6. **Check it:** run `node tools/decide-calibration/eval-shipped.mjs`, then update these
+   together: its `EXPECTED` table, `HEADLINE` in `src/demos/decide/stats.js` (the homepage card;
+   also checked by this script), the results table and lessons in `docs/decide.md`, the Expected
+   table above, the /decide rows in `docs/facts.md`, and the PR text.
 7. **Check the app:** `npm run build`, then on `/decide` load the model, decide a sample ticket,
    move the error-target slider, and use Edit → Reset.
 
