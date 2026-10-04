@@ -1,29 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-const demoList = [
-  {
-    id: 'decide',
-    name: 'Decide',
-    description: 'Auto-route a support ticket only when a calibrated confidence threshold meets your error target; escalate the rest',
-    category: 'decisions'
-  },
-  {
-    id: 'cross-encoder',
-    name: 'Cross Encoder',
-    description: 'Text similarity and relevance scoring',
-    category: 'classification'
-  },
-  {
-    id: 'zero-shot',
-    name: 'Zero-Shot Classification',
-    description: 'Classify text without specific training',
-    category: 'classification'
-  }
-];
+import { liveDemos } from './demos/registry.js';
 
 // Group demos by category
-const groupedDemos = demoList.reduce((acc, demo) => {
+const groupedDemos = liveDemos.reduce((acc, demo) => {
   if (!acc[demo.category]) {
     acc[demo.category] = [];
   }

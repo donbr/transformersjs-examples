@@ -45,6 +45,10 @@ body {
 .layout-container {
   display: grid;
   grid-template-rows: auto 1fr auto;
+  /* Pin the single column to the viewport. Without it the implicit auto column grows to
+     the widest demo content (zero-shot needs ~411px at a 390px viewport), widening the
+     header too, and overflow:hidden then clips its right edge (the menu button). */
+  grid-template-columns: minmax(0, 1fr);
   min-height: var(--app-height);
   height: var(--app-height);
   overflow: hidden;
