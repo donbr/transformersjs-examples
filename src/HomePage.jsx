@@ -1,18 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { liveDemos, plannedDemos } from './demos/registry.js';
+import { HEADLINE, RUNTIME } from './demos/decide/stats.js';
 
 // Homepage, aligned with donbr.github.io's HomePage.tsx (hero, metric row, card grid, footer)
 // and the design canvas's Home boards. Content spans max-w-6xl px-4 to line up with the header.
 
 const REPO = 'https://github.com/donbr/transformersjs-examples';
 
-// /decide's headline numbers. Static so the homepage chunk does not pull in the calibration
-// data; they must match `node tools/decide-calibration/eval-shipped.mjs` at the 5% target.
-const DECIDE_STATS = { routed: '68%', error: '3.2%', target: '≤5%', threshold: '0.45' };
+const pct = (x, digits) => `${(x * 100).toFixed(digits)}%`;
 
-const flagship = liveDemos.find((demo) => demo.id === 'decide');
-const others = liveDemos.filter((demo) => demo.id !== 'decide');
+// The flagship card shows /decide's measured facts (src/demos/decide/stats.js, checked by
+// eval-shipped.mjs), so it renders only while /decide is the registry's flagship.
+const flagship = liveDemos.find((demo) => demo.flagship && demo.id === 'decide');
+const others = liveDemos.filter((demo) => demo !== flagship);
 
 function Pill({ className, children }) {
   return (
@@ -59,7 +60,7 @@ function SectionHeading({ id, title, subtitle }) {
   );
 }
 
-function FlagshipCard({ demo }) {
+function DecideFlagshipCard({ demo }) {
   return (
     <Link
       to={`/${demo.id}`}
@@ -77,11 +78,11 @@ function FlagshipCard({ demo }) {
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-600">
           <span className="inline-flex items-center gap-1.5">
             <Icon paths={ICONS.download} />
-            357 MB one-time download (487 MB on WASM)
+            {RUNTIME.downloadWebGPU} one-time download ({RUNTIME.downloadWasm} on WASM)
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Icon paths={ICONS.clock} />
-            ~40 s first load on a fast connection, then ~0.4 s per ticket on WebGPU
+            {RUNTIME.firstLoad} first load on a fast connection, then {RUNTIME.perTicket} per ticket on WebGPU
           </span>
           <span className="font-medium text-blue-800">WebGPU preferred · falls back to WASM</span>
         </div>
@@ -89,12 +90,12 @@ function FlagshipCard({ demo }) {
       </div>
       <div className="flex-[1_1_18rem] min-w-0 flex flex-col gap-1.5 bg-gray-50 border border-gray-200 rounded-lg p-5">
         <span className="text-sm font-semibold text-gray-600">Held-out test</span>
-        <span className="text-4xl font-bold text-blue-600 leading-tight">{DECIDE_STATS.routed}</span>
+        <span className="text-4xl font-bold text-blue-600 leading-tight">{pct(HEADLINE.routedInScope, 0)}</span>
         <span className="text-gray-700">
-          of in-scope tickets auto-routed, with {DECIDE_STATS.error} error when acting
+          of in-scope tickets auto-routed, with {pct(HEADLINE.errorWhenActing, 1)} error when acting
         </span>
         <span className="text-sm text-gray-500">
-          CLINC150 banking · {DECIDE_STATS.target} target · threshold {DECIDE_STATS.threshold}
+          CLINC150 banking · ≤{pct(HEADLINE.target, 0)} target · threshold {HEADLINE.threshold.toFixed(2)}
         </span>
       </div>
     </Link>
@@ -133,14 +134,15 @@ function PlannedCard({ demo }) {
 
 function HomePage() {
   const metrics = [
-    { value: `${liveDemos.length} Live Tools`, caption: 'Decide · Zero-shot · Reranking', color: 'text-blue-600' },
-    { value: `${plannedDemos.length} Planned`, caption: 'Verify · Guard · Redact', color: 'text-purple-600' },
+    { value: `${liveDemos.length} Live Tools`, caption: liveDemos.map((d) => d.shortName).join(' · '), color: 'text-blue-600' },
+    { value: `${plannedDemos.length} Planned`, caption: plannedDemos.map((d) => d.shortName).join(' · '), color: 'text-purple-600' },
     { value: 'WebGPU or WASM', caption: 'Decide uses the GPU when it can', color: 'text-green-600' },
-    { value: '0 Inference Servers', caption: 'Models download once; inference runs on-device', color: 'text-orange-600' },
+    { value: 'On-device', caption: 'No inference server', color: 'text-orange-600' },
   ];
 
   return (
-    <div className="min-h-full flex flex-col">
+    // flex-grow fills App's min-h-full flex wrapper, so a short page still pins the footer.
+    <div className="flex-grow flex flex-col">
       {/* Hero */}
       <section className="bg-white">
         <div className="max-w-6xl mx-auto px-4 py-10 sm:py-16 text-center">
@@ -180,15 +182,15 @@ function HomePage() {
             {metrics.map((m) => (
               <div key={m.value} className="flex flex-col-reverse justify-end">
                 <dt className="text-sm text-gray-600">{m.caption}</dt>
-                <dd className={`text-lg sm:text-2xl font-bold leading-tight ${m.color}`}>{m.value}</dd>
+                <dd className={`text-base sm:text-2xl font-bold leading-tight ${m.color}`}>{m.value}</dd>
               </div>
             ))}
           </dl>
         </div>
       </section>
 
-      {/* Tools */}
-      <main className="flex-grow">
+      {/* Tools. A div, not <main>: Layout already renders the page's <main>. */}
+      <div className="flex-grow">
         <div className="max-w-6xl mx-auto px-4 py-10 sm:py-14 flex flex-col gap-14">
           <section aria-labelledby="live-heading">
             <SectionHeading
@@ -197,7 +199,7 @@ function HomePage() {
               subtitle="Everything runs on-device in any modern browser. Decide is faster with WebGPU."
             />
             <div className="flex flex-col gap-6">
-              {flagship && <FlagshipCard demo={flagship} />}
+              {flagship && <DecideFlagshipCard demo={flagship} />}
               <div className="grid md:grid-cols-2 gap-6">
                 {others.map((demo) => (
                   <ToolCard key={demo.id} demo={demo} />
@@ -215,7 +217,7 @@ function HomePage() {
             </div>
           </section>
         </div>
-      </main>
+      </div>
 
       {/* Footer, as donbr.github.io's Layout footer. Rendered here (not via Layout's footer
           prop) so demo routes keep their full height. */}

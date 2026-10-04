@@ -17,7 +17,7 @@ function App() {
   // header state such as the mobile menu can never re-key or remount a demo and its worker.
   return (
     <Layout header={<SiteHeader />}>
-      <div className={isHome ? 'min-h-full' : 'container mx-auto p-4 h-full'}>
+      <div className={isHome ? 'min-h-full flex flex-col' : 'container mx-auto p-4 h-full'}>
         <React.Suspense fallback={
           <div className="flex justify-center items-center h-full">
             <div className="text-center">
