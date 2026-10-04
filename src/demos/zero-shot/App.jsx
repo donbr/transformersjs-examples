@@ -253,7 +253,7 @@ function App() {
                 </span>
               ))}
               <span className="inline-flex items-center px-3 py-1 rounded-full border border-dashed border-gray-300 text-sm text-gray-500">
-                {OTHER} (below the cutoff)
+                {OTHER} (below the minimum or category removed)
               </span>
             </div>
             <form
